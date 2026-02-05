@@ -85,8 +85,9 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} MFC - Makyo Fried Chicken. All rights reserved.</p>
+        <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground space-y-1">
+          <p>© 2026 MFC - Makyo Fried Chicken. All rights reserved.</p>
+          <p className="text-xs">Developed By Jihal Shimray eX Holdings PVT LTD.</p>
         </div>
       </div>
     </motion.footer>
