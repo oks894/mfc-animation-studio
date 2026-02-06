@@ -1,12 +1,11 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Product, Category } from '@/types/database';
 import { useCart } from '@/contexts/CartContext';
 import { useActivePromotions } from '@/hooks/usePromotions';
-import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product & { category?: Category | null };
@@ -16,6 +15,9 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   const { addItem } = useCart();
   const { data: promotions } = useActivePromotions();
+  const [isHovered, setIsHovered] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const activeDiscount = promotions?.find(
     p => p.applies_to_all || p.product_ids?.includes(product.id)
@@ -24,41 +26,126 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   const discountedPrice = product.price * (1 - discountPercentage / 100);
 
   const handleAddToCart = () => {
-    if (product.in_stock) {
+    if (product.in_stock && !isAdding) {
+      setIsAdding(true);
       addItem(product);
+      
+      // Reset after animation
+      setTimeout(() => setIsAdding(false), 600);
     }
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      whileHover={{ y: -5 }}
-      className="group relative overflow-hidden rounded-xl border bg-card shadow-sm transition-all duration-300 hover:shadow-card-hover"
+      ref={cardRef}
+      initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
+      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      transition={{ 
+        delay: index * 0.1, 
+        duration: 0.8, 
+        ease: [0.19, 1, 0.22, 1] 
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="group relative overflow-hidden rounded-xl border bg-card transition-all duration-700 ease-cinematic"
+      style={{
+        boxShadow: isHovered 
+          ? '0 25px 50px -12px hsl(25 95% 55% / 0.2), 0 0 30px hsl(45 100% 50% / 0.1)'
+          : '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+        transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
+      }}
     >
-      {/* Image */}
+      {/* Warm glow effect on hover */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
+        className="absolute -inset-1 rounded-xl pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at center, hsl(35 100% 50% / 0.15) 0%, transparent 70%)',
+          filter: 'blur(20px)',
+        }}
+      />
+
+      {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-muted">
         {product.images?.[0] ? (
           <motion.img
             src={product.images[0]}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="h-full w-full object-cover"
+            style={{
+              transform: isHovered ? 'scale(1.06)' : 'scale(1)',
+              transition: 'transform 0.7s cubic-bezier(0.19, 1, 0.22, 1)',
+            }}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-6xl">
+          <motion.div 
+            className="flex h-full w-full items-center justify-center text-6xl select-none"
+            animate={{ scale: isHovered ? 1.06 : 1 }}
+            transition={{ duration: 0.7, ease: [0.19, 1, 0.22, 1] }}
+          >
             🍗
-          </div>
+          </motion.div>
         )}
+
+        {/* Oil shine sweep on hover */}
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: '200%' }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: [0.19, 1, 0.22, 1] }}
+              className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12 pointer-events-none"
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Ember sparks on hover */}
+        <AnimatePresence>
+          {isHovered && (
+            <>
+              {[...Array(4)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ 
+                    y: 20, 
+                    x: 20 + i * 30, 
+                    opacity: 0,
+                    scale: 0 
+                  }}
+                  animate={{ 
+                    y: -40, 
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0.5]
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    duration: 1.5,
+                    delay: i * 0.15,
+                    ease: 'easeOut',
+                  }}
+                  className="absolute bottom-8 w-1 h-1 rounded-full pointer-events-none"
+                  style={{
+                    background: 'hsl(35 100% 55%)',
+                    boxShadow: '0 0 6px hsl(35 100% 50% / 0.8)',
+                  }}
+                />
+              ))}
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Discount Badge */}
         {discountPercentage > 0 && (
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
+            initial={{ scale: 0, rotate: -12 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
             className="absolute left-3 top-3"
           >
-            <Badge className="bg-primary text-primary-foreground font-bold">
+            <Badge className="bg-primary text-primary-foreground font-bold shadow-lg">
               -{discountPercentage}%
             </Badge>
           </motion.div>
@@ -66,37 +153,51 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
 
         {/* Out of Stock Overlay */}
         {!product.in_stock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-            <Badge variant="destructive" className="text-sm">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+            <Badge variant="destructive" className="text-sm shadow-lg">
               Out of Stock
             </Badge>
           </div>
         )}
 
-        {/* Add to Cart Button (Hover) */}
+        {/* Add to Cart Button (slides up on hover) */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileHover={{ opacity: 1, y: 0 }}
-          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ 
+            opacity: isHovered ? 1 : 0, 
+            y: isHovered ? 0 : 30 
+          }}
+          transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
+          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-foreground/70 to-transparent p-4"
         >
-          <Button
-            onClick={handleAddToCart}
-            disabled={!product.in_stock}
-            className="w-full"
-            size="sm"
+          <motion.div
+            whileTap={{ scale: 0.96 }}
+            transition={{ duration: 0.2 }}
           >
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Add to Cart
-          </Button>
+            <Button
+              onClick={handleAddToCart}
+              disabled={!product.in_stock}
+              className="w-full shadow-lg"
+              size="sm"
+            >
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Add to Cart
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-4 relative">
         {product.category && (
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          <motion.span 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: index * 0.1 + 0.3 }}
+            className="text-xs font-medium text-muted-foreground uppercase tracking-wide"
+          >
             {product.category.name}
-          </span>
+          </motion.span>
         )}
         <h3 className="mt-1 font-semibold line-clamp-1">{product.name}</h3>
         {product.description && (
@@ -107,9 +208,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
 
         <div className="mt-3 flex items-center justify-between">
           <div className="flex items-baseline gap-2">
-            <span className="text-lg font-bold text-primary">
+            <motion.span 
+              key={discountedPrice}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-lg font-bold text-primary"
+            >
               ₹{discountedPrice.toFixed(2)}
-            </span>
+            </motion.span>
             {discountPercentage > 0 && (
               <span className="text-sm text-muted-foreground line-through">
                 ₹{product.price.toFixed(2)}
@@ -117,15 +223,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
             )}
           </div>
 
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <motion.div 
+            whileHover={{ scale: 1.08 }} 
+            whileTap={{ scale: 0.92 }}
+            transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
+          >
             <Button
               variant="secondary"
               size="icon"
               onClick={handleAddToCart}
               disabled={!product.in_stock}
-              className="h-9 w-9"
+              className="h-9 w-9 shadow-md"
             >
-              <Plus className="h-4 w-4" />
+              <motion.div
+                animate={isAdding ? { rotate: [0, 15, -15, 0] } : {}}
+                transition={{ duration: 0.4 }}
+              >
+                <Plus className="h-4 w-4" />
+              </motion.div>
             </Button>
           </motion.div>
         </div>
