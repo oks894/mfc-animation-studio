@@ -121,6 +121,48 @@ export type Database = {
         }
         Relationships: []
       }
+      site_content: {
+        Row: {
+          address: string | null
+          content: string
+          email: string | null
+          id: string
+          image_url: string | null
+          map_embed_url: string | null
+          phone_1: string | null
+          phone_2: string | null
+          section: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          content?: string
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          map_embed_url?: string | null
+          phone_1?: string | null
+          phone_2?: string | null
+          section: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          content?: string
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          map_embed_url?: string | null
+          phone_1?: string | null
+          phone_2?: string | null
+          section?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       store_settings: {
         Row: {
           admin_password_hash: string

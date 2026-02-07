@@ -9,6 +9,8 @@ import { AdminProvider } from "@/contexts/AdminContext";
 // Pages
 import Index from "./pages/Index";
 import Checkout from "./pages/Checkout";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -17,6 +19,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminPromotions from "./pages/admin/AdminPromotions";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminContent from "./pages/admin/AdminContent";
 import AdminLayout from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
@@ -33,6 +36,8 @@ const App = () => (
               {/* Customer Routes */}
               <Route path="/" element={<Index />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
               
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminLogin />} />
@@ -40,6 +45,7 @@ const App = () => (
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/products" element={<AdminProducts />} />
                 <Route path="/admin/promotions" element={<AdminPromotions />} />
+                <Route path="/admin/content" element={<AdminContent />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
               </Route>
               
