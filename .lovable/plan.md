@@ -1,64 +1,136 @@
 
+# Admin Sign-in Fix + About & Contact Content Management
 
-# Admin User Account Setup Plan
+## Issue Identified: Admin Sign-in
 
-## Current Situation
-- The authentication system is already set up using Supabase Auth
-- The `user_roles` table exists but is empty
-- The admin login page is at `/admin` and uses email/password authentication
-- Once logged in, the system checks the `user_roles` table for admin privileges
+After investigation, I found there are **two user accounts** in the system:
 
-## Setup Process
+| Email | User ID | Has Admin Role? |
+|-------|---------|-----------------|
+| hashtagdropee@gmail.com | e7ca4f29-1930-420d-898e-d6c97b81357b | Yes |
+| jihalshimray1@gmail.com | f6e38e77-0d9f-4adb-84e5-b3d16238ef35 | **No** |
 
-### Step 1: Create the User Account
-You need to sign up first. The current admin login page only has a login form, but no signup capability. I'll add a signup option to the admin login page so you can create your account.
-
-### Step 2: Enable Email Auto-Confirm (Recommended for Testing)
-Currently, new signups require email verification. For faster testing, we can enable auto-confirm so you can immediately log in after signing up.
-
-### Step 3: Add Admin Role to the User
-After you sign up, I'll run a SQL query to add your user ID to the `user_roles` table with the `admin` role.
+If you're trying to log in with `jihalshimray1@gmail.com`, that account doesn't have admin access yet. I'll add the admin role to this account as well.
 
 ---
 
-## Implementation Details
+## New Feature: About & Contact Content Management
 
-### File Changes
-
-**1. Update Admin Login Page** (`src/pages/admin/AdminLogin.tsx`)
-- Add a signup tab/toggle alongside the login form
-- Include fields for email and password
-- Show clear feedback on successful registration
-- Explain next steps (admin role needs to be assigned)
+I'll create an admin-manageable content system for "About" and "Contact" sections that will appear on the main website.
 
 ### Database Changes
 
-**2. Add Admin Role** (after you sign up)
-Once you register, I'll execute this SQL to grant admin access:
-```sql
-INSERT INTO user_roles (user_id, role)
-SELECT id, 'admin'
-FROM auth.users
-WHERE email = 'hashtagdropee@gmail.com';
+**New Table: `site_content`**
+```text
++------------------+-------------------+--------------------------------+
+| Column           | Type              | Description                    |
++------------------+-------------------+--------------------------------+
+| id               | uuid (PK)         | Primary key                    |
+| section          | text              | 'about' or 'contact'           |
+| title            | text              | Section heading                |
+| content          | text              | Main content (supports rich)   |
+| address          | text (nullable)   | For contact section            |
+| email            | text (nullable)   | Contact email                  |
+| phone_1          | text (nullable)   | Primary phone                  |
+| phone_2          | text (nullable)   | Secondary phone                |
+| map_embed_url    | text (nullable)   | Google Maps embed URL          |
+| image_url        | text (nullable)   | Featured image                 |
+| updated_at       | timestamptz       | Last update timestamp          |
++------------------+-------------------+--------------------------------+
+```
+
+**RLS Policies:**
+- Anyone can READ (public content)
+- Only admins can INSERT/UPDATE
+
+---
+
+### New Files to Create
+
+1. **`src/pages/About.tsx`**
+   - Public page displaying About content from database
+   - Cinematic animations matching existing style
+   - Multi-layer parallax effects
+   - Slow, calm, confident motion per design specs
+
+2. **`src/pages/Contact.tsx`**
+   - Public page displaying Contact information
+   - Interactive map embed
+   - Contact form (optional - sends via WhatsApp)
+   - Animated icons with stroke-draw effects
+
+3. **`src/pages/admin/AdminContent.tsx`**
+   - Admin page to manage About and Contact content
+   - Rich text editing for descriptions
+   - Image upload for featured images
+   - Live preview of changes
+
+4. **`src/hooks/useSiteContent.ts`**
+   - Custom hook for fetching/updating site content
+   - React Query integration for caching
+
+---
+
+### Files to Modify
+
+1. **`src/App.tsx`**
+   - Add routes: `/about`, `/contact`, `/admin/content`
+
+2. **`src/components/admin/AdminSidebar.tsx`**
+   - Add "Site Content" navigation item with FileText icon
+
+3. **`src/components/layout/Header.tsx`**
+   - Add navigation links to About and Contact pages
+
+4. **`src/components/layout/Footer.tsx`**
+   - Add links to About and Contact pages
+
+---
+
+### Implementation Summary
+
+```text
+Phase 1: Fix Admin Access
+  - Add admin role to jihalshimray1@gmail.com
+
+Phase 2: Database Setup
+  - Create site_content table with RLS policies
+  - Seed initial content for About and Contact
+
+Phase 3: Admin Interface
+  - Create AdminContent.tsx for content management
+  - Add to admin sidebar navigation
+  - Include image upload capability
+
+Phase 4: Public Pages
+  - Create About.tsx with cinematic animations
+  - Create Contact.tsx with map and contact info
+  - Add navigation links in Header and Footer
+
+Phase 5: Testing
+  - Verify admin can edit content
+  - Confirm public pages display correctly
+  - Test responsive design on mobile
 ```
 
 ---
 
-## User Experience Flow
+### Technical Details
 
-1. Navigate to `/admin`
-2. Click "Sign Up" tab
-3. Enter email: `hashtagdropee@gmail.com` and password: `000000`
-4. Complete signup
-5. Tell me once done - I'll add the admin role
-6. Log in with your credentials
-7. Access the admin dashboard
+**Cinematic Animations for About Page:**
+- Slow parallax scrolling on images
+- Text fades in slower than rest of site
+- Icons animate with stroke-draw effects
+- Background grain becomes more visible
 
----
+**Contact Page Features:**
+- Google Maps embed with warm-toned overlay
+- Contact details with hover animations
+- Optional WhatsApp contact form
+- Animated social icons on proximity
 
-## Security Considerations
-
-- Password `000000` is very weak - consider changing it later in production
-- The signup form will be visible but new users won't have admin access until manually added to `user_roles`
-- RLS policies ensure only admins can view/modify the `user_roles` table
-
+**Admin Content Editor:**
+- Textarea for content (Markdown-ready)
+- Image upload using existing Supabase storage
+- Real-time save indicator
+- Preview toggle to see changes
