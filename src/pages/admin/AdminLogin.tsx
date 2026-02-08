@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Lock, ArrowLeft, UserPlus } from 'lucide-react';
@@ -13,10 +13,17 @@ import { toast } from 'sonner';
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
-  const { login, isLoading } = useAdmin();
+  const { login, isAdmin, isLoading, user } = useAdmin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // If already signed in as admin, skip login screen.
+    if (user && isAdmin && !isLoading) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [user, isAdmin, isLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +36,8 @@ const AdminLogin: React.FC = () => {
       setLoading(false);
     } else {
       toast.success('Welcome back!');
-      navigate('/admin/dashboard');
+      setLoading(false);
+      // Redirect is handled by the effect once admin role is confirmed.
     }
   };
 

@@ -19,18 +19,17 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const checkAdminRole = useCallback(async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin',
+      });
 
       if (error) {
         console.error('Error checking admin role:', error);
         return false;
       }
-      return !!data;
+
+      return data === true;
     } catch (error) {
       console.error('Error checking admin role:', error);
       return false;
@@ -38,32 +37,65 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const adminStatus = await checkAdminRole(session.user.id);
-        setIsAdmin(adminStatus);
-      } else {
+    // Listener first (keep callback synchronous)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const nextUser = session?.user ?? null;
+      setUser(nextUser);
+
+      // If a user exists, we must verify their admin role before granting access.
+      setIsLoading(!!nextUser);
+      if (!nextUser) {
         setIsAdmin(false);
       }
-      setIsLoading(false);
     });
 
-    // Initial check
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const adminStatus = await checkAdminRole(session.user.id);
-        setIsAdmin(adminStatus);
+    // Then initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const nextUser = session?.user ?? null;
+      setUser(nextUser);
+      setIsLoading(!!nextUser);
+      if (!nextUser) {
+        setIsAdmin(false);
       }
-      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [checkAdminRole]);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const verify = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        setIsLoading(false);
+        return;
+      }
+
+      const adminStatus = await checkAdminRole(user.id);
+      if (cancelled) return;
+
+      setIsAdmin(adminStatus);
+      setIsLoading(false);
+
+      // If someone signs in without admin access, force logout.
+      if (!adminStatus) {
+        await supabase.auth.signOut();
+      }
+    };
+
+    verify();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, checkAdminRole]);
 
   const login = async (email: string, password: string): Promise<{ error: string | null }> => {
+    setIsLoading(true);
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -71,20 +103,24 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       });
 
       if (error) {
+        setIsLoading(false);
         return { error: error.message };
       }
 
+      // Extra guard: immediately block non-admins (so they don't get a "flash" of access)
       if (data.user) {
         const adminStatus = await checkAdminRole(data.user.id);
         if (!adminStatus) {
           await supabase.auth.signOut();
+          setIsLoading(false);
           return { error: 'You do not have admin access' };
         }
-        setIsAdmin(true);
       }
 
+      // Final state will be set by the auth listener + role verification effect.
       return { error: null };
-    } catch (error) {
+    } catch (_error) {
+      setIsLoading(false);
       return { error: 'An unexpected error occurred' };
     }
   };
@@ -93,6 +129,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     await supabase.auth.signOut();
     setUser(null);
     setIsAdmin(false);
+    setIsLoading(false);
   };
 
   return (
