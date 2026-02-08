@@ -116,7 +116,7 @@ const AdminLogin: React.FC = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading || isLoading}>
+                  <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? 'Signing in...' : 'Sign In'}
                   </Button>
                 </form>
