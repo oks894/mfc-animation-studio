@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
+import type { Session, User } from '@supabase/supabase-js';
 
 interface AdminContextType {
   user: User | null;
@@ -17,7 +24,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Cache only positive admin checks for speed (avoid caching false so role grants can take effect).
+  const adminTrueCacheRef = useRef<Record<string, true>>({});
+
   const checkAdminRole = useCallback(async (userId: string) => {
+    if (adminTrueCacheRef.current[userId]) return true;
+
     try {
       const { data, error } = await supabase.rpc('has_role', {
         _user_id: userId,
@@ -29,78 +41,126 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return false;
       }
 
-      return data === true;
+      const isAdminUser = data === true;
+      if (isAdminUser) adminTrueCacheRef.current[userId] = true;
+      return isAdminUser;
     } catch (error) {
       console.error('Error checking admin role:', error);
       return false;
     }
   }, []);
 
+  // Keep auth listener synchronous: only set session/user/loading here.
+  // Role verification happens in a separate effect.
   useEffect(() => {
     let isMounted = true;
 
-    const initialize = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!isMounted) return;
-
+    const applySession = (session: Session | null) => {
       const nextUser = session?.user ?? null;
       setUser(nextUser);
 
-      if (nextUser) {
-        const adminStatus = await checkAdminRole(nextUser.id);
-        if (!isMounted) return;
-        setIsAdmin(adminStatus);
-      } else {
+      if (!nextUser) {
         setIsAdmin(false);
+        setIsLoading(false);
+      } else {
+        // We have a user; role check will determine access.
+        setIsLoading(true);
       }
-      setIsLoading(false);
     };
 
-    initialize();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+      applySession(session);
+    });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
         if (!isMounted) return;
-        const nextUser = session?.user ?? null;
-        setUser(nextUser);
-
-        if (nextUser) {
-          const adminStatus = await checkAdminRole(nextUser.id);
-          if (!isMounted) return;
-          setIsAdmin(adminStatus);
-        } else {
-          setIsAdmin(false);
-        }
+        applySession(session);
+      })
+      .catch(() => {
+        if (!isMounted) return;
         setIsLoading(false);
-      }
-    );
+      });
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [checkAdminRole]);
+  }, []);
+
+  // Verify role whenever we have a user.
+  useEffect(() => {
+    let cancelled = false;
+
+    const verify = async () => {
+      if (!user) return;
+
+      // Fast path: if we've already confirmed admin for this user, don't re-check.
+      if (adminTrueCacheRef.current[user.id]) {
+        setIsAdmin(true);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      const adminStatus = await checkAdminRole(user.id);
+      if (cancelled) return;
+
+      setIsAdmin(adminStatus);
+      setIsLoading(false);
+
+      // If a non-admin is signed in, force logout.
+      if (!adminStatus) {
+        await supabase.auth.signOut();
+      }
+    };
+
+    verify();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, checkAdminRole]);
 
   const login = async (email: string, password: string): Promise<{ error: string | null }> => {
+    setIsLoading(true);
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (error) return { error: error.message };
-
-      if (data.user) {
-        const adminStatus = await checkAdminRole(data.user.id);
-        if (!adminStatus) {
-          await supabase.auth.signOut();
-          return { error: 'You do not have admin access' };
-        }
-        // Set state immediately so redirect happens without waiting for listener
-        setUser(data.user);
-        setIsAdmin(true);
+      if (error) {
         setIsLoading(false);
+        return { error: error.message };
       }
+
+      const nextUser = data.user ?? null;
+      if (!nextUser) {
+        setIsLoading(false);
+        return { error: 'Login failed. Please try again.' };
+      }
+
+      const adminStatus = await checkAdminRole(nextUser.id);
+      if (!adminStatus) {
+        await supabase.auth.signOut();
+        setUser(null);
+        setIsAdmin(false);
+        setIsLoading(false);
+        return { error: 'You do not have admin access' };
+      }
+
+      // Set state immediately so redirect happens without waiting for the auth listener.
+      adminTrueCacheRef.current[nextUser.id] = true;
+      setUser(nextUser);
+      setIsAdmin(true);
+      setIsLoading(false);
 
       return { error: null };
     } catch (_error) {
+      setIsLoading(false);
       return { error: 'An unexpected error occurred' };
     }
   };
@@ -109,6 +169,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     await supabase.auth.signOut();
     setUser(null);
     setIsAdmin(false);
+    setIsLoading(false);
   };
 
   return (
