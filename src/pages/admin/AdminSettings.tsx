@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Store, Clock, Phone } from 'lucide-react';
+import { Save, Store, Clock, Phone, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,8 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import AddAdminDialog from '@/components/admin/AddAdminDialog';
+import TimeInput12hr from '@/components/ui/time-input-12hr';
 import { useStoreSettings, useUpdateStoreSettings } from '@/hooks/useStoreSettings';
 import { toast } from 'sonner';
 
@@ -143,21 +145,19 @@ const AdminSettings: React.FC = () => {
                 <CardContent className="space-y-6">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="opening_time">Opening Time</Label>
-                      <Input
+                      <Label className="mb-2 block">Opening Time</Label>
+                      <TimeInput12hr
                         id="opening_time"
-                        type="time"
                         value={formData.opening_time}
-                        onChange={(e) => setFormData(prev => ({ ...prev, opening_time: e.target.value }))}
+                        onChange={(val) => setFormData(prev => ({ ...prev, opening_time: val }))}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="closing_time">Closing Time</Label>
-                      <Input
+                      <Label className="mb-2 block">Closing Time</Label>
+                      <TimeInput12hr
                         id="closing_time"
-                        type="time"
                         value={formData.closing_time}
-                        onChange={(e) => setFormData(prev => ({ ...prev, closing_time: e.target.value }))}
+                        onChange={(val) => setFormData(prev => ({ ...prev, closing_time: val }))}
                       />
                     </div>
                   </div>
@@ -235,6 +235,29 @@ const AdminSettings: React.FC = () => {
                     Customers will see this for GPay payments
                   </p>
                 </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Admin Management */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Admin Management
+                </CardTitle>
+                <CardDescription>Add new administrators to the dashboard</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AddAdminDialog />
+                <p className="text-xs text-muted-foreground mt-3">
+                  New admins will be able to log in immediately after creation
+                </p>
               </CardContent>
             </Card>
           </motion.div>

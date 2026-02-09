@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
@@ -29,10 +31,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { usePromotions, useCreatePromotion, useUpdatePromotion, useDeletePromotion } from '@/hooks/usePromotions';
+import { useProducts } from '@/hooks/useProducts';
 import { Promotion } from '@/types/database';
 
 const AdminPromotions: React.FC = () => {
   const { data: promotions, isLoading } = usePromotions();
+  const { data: products } = useProducts();
   const createPromotion = useCreatePromotion();
   const updatePromotion = useUpdatePromotion();
   const deletePromotion = useDeletePromotion();
@@ -47,6 +51,7 @@ const AdminPromotions: React.FC = () => {
     discount_percentage: '',
     is_active: true,
     applies_to_all: true,
+    product_ids: [] as string[],
     valid_from: '',
     valid_until: '',
   });
@@ -58,6 +63,7 @@ const AdminPromotions: React.FC = () => {
       discount_percentage: '',
       is_active: true,
       applies_to_all: true,
+      product_ids: [],
       valid_from: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
       valid_until: '',
     });
@@ -77,10 +83,20 @@ const AdminPromotions: React.FC = () => {
       discount_percentage: promo.discount_percentage.toString(),
       is_active: promo.is_active,
       applies_to_all: promo.applies_to_all,
+      product_ids: promo.product_ids || [],
       valid_from: promo.valid_from ? format(new Date(promo.valid_from), "yyyy-MM-dd'T'HH:mm") : '',
       valid_until: promo.valid_until ? format(new Date(promo.valid_until), "yyyy-MM-dd'T'HH:mm") : '',
     });
     setIsDialogOpen(true);
+  };
+
+  const toggleProductSelection = (productId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      product_ids: prev.product_ids.includes(productId)
+        ? prev.product_ids.filter(id => id !== productId)
+        : [...prev.product_ids, productId],
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +108,7 @@ const AdminPromotions: React.FC = () => {
       discount_percentage: parseInt(formData.discount_percentage) || 0,
       is_active: formData.is_active,
       applies_to_all: formData.applies_to_all,
-      product_ids: [],
+      product_ids: formData.applies_to_all ? [] : formData.product_ids,
       banner_image: null,
       valid_from: formData.valid_from ? new Date(formData.valid_from).toISOString() : new Date().toISOString(),
       valid_until: formData.valid_until ? new Date(formData.valid_until).toISOString() : null,
@@ -300,6 +316,41 @@ const AdminPromotions: React.FC = () => {
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, applies_to_all: checked }))}
                 />
               </div>
+
+              {/* Product Selection (when not applies_to_all) */}
+              {!formData.applies_to_all && (
+                <div className="rounded-lg border p-4">
+                  <Label className="mb-3 block">Select Products</Label>
+                  <ScrollArea className="h-48">
+                    <div className="space-y-2">
+                      {products?.map((product) => (
+                        <div
+                          key={product.id}
+                          className="flex items-center space-x-3 rounded-md p-2 hover:bg-muted/50"
+                        >
+                          <Checkbox
+                            id={`product-${product.id}`}
+                            checked={formData.product_ids.includes(product.id)}
+                            onCheckedChange={() => toggleProductSelection(product.id)}
+                          />
+                          <Label
+                            htmlFor={`product-${product.id}`}
+                            className="flex-1 cursor-pointer text-sm"
+                          >
+                            {product.name}
+                            <span className="ml-2 text-muted-foreground">₹{product.price}</span>
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  {formData.product_ids.length > 0 && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {formData.product_ids.length} product(s) selected
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
