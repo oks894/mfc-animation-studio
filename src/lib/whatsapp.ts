@@ -30,10 +30,11 @@ export const formatOrderMessage = (
 
   if (discount > 0) {
     lines.push(`Discount: -₹${discount.toFixed(2)}`);
-    lines.push(`*Total: ₹${(subtotal - discount).toFixed(2)}*`);
-  } else {
-    lines.push(`*Total: ₹${subtotal.toFixed(2)}*`);
   }
+  
+  lines.push(`*Total: ₹${(subtotal - discount).toFixed(2)}*`);
+  lines.push('');
+  lines.push('🚚 *Delivery: ₹50/km (Hashtag Dropee)*');
 
   lines.push('');
   lines.push(`💳 Payment Method: ${formData.paymentMethod === 'gpay' ? 'GPay (UPI)' : 'Cash on Delivery'}`);

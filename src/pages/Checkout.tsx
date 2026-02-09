@@ -33,10 +33,36 @@ const Checkout: React.FC = () => {
   });
   const [copied, setCopied] = useState(false);
 
-  // Calculate discount
-  const activeDiscount = promotions?.find(p => p.applies_to_all && p.discount_percentage > 0);
-  const discountPercentage = activeDiscount?.discount_percentage || 0;
-  const discountAmount = (subtotal * discountPercentage) / 100;
+  // Calculate discount - check both applies_to_all and product-specific promotions
+  const calculateDiscount = () => {
+    let totalDiscount = 0;
+    
+    items.forEach(item => {
+      // Check for product-specific promotion
+      const productPromo = promotions?.find(p => 
+        !p.applies_to_all && 
+        p.product_ids?.includes(item.product.id) && 
+        p.discount_percentage > 0
+      );
+      
+      // Check for applies_to_all promotion
+      const globalPromo = promotions?.find(p => p.applies_to_all && p.discount_percentage > 0);
+      
+      // Use the higher discount
+      const applicableDiscount = Math.max(
+        productPromo?.discount_percentage || 0,
+        globalPromo?.discount_percentage || 0
+      );
+      
+      if (applicableDiscount > 0) {
+        totalDiscount += (item.product.price * item.quantity * applicableDiscount) / 100;
+      }
+    });
+    
+    return totalDiscount;
+  };
+
+  const discountAmount = calculateDiscount();
   const total = subtotal - discountAmount;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -283,15 +309,18 @@ const Checkout: React.FC = () => {
                           <span className="text-muted-foreground">Subtotal</span>
                           <span>₹{subtotal.toFixed(2)}</span>
                         </div>
-                        {discountPercentage > 0 && (
+                        {discountAmount > 0 && (
                           <div className="flex justify-between text-green-600">
-                            <span>Discount ({discountPercentage}%)</span>
+                            <span>Discount</span>
                             <span>-₹{discountAmount.toFixed(2)}</span>
                           </div>
                         )}
                         <div className="flex justify-between text-muted-foreground">
                           <span>Delivery</span>
-                          <span>Free</span>
+                          <span className="text-right">
+                            <span className="block">₹50/km</span>
+                            <span className="text-xs">(via Hashtag Dropee)</span>
+                          </span>
                         </div>
                       </div>
 
