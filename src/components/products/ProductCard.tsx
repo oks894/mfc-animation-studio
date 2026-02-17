@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, ShoppingCart } from 'lucide-react';
+import { Plus, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Product, Category } from '@/types/database';
@@ -17,7 +17,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   const { data: promotions } = useActivePromotions();
   const [isHovered, setIsHovered] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
+  const imageCount = product.images?.length || 0;
 
   const activeDiscount = promotions?.find(
     p => p.applies_to_all || p.product_ids?.includes(product.id)
@@ -69,16 +71,51 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
 
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-muted">
-        {product.images?.[0] ? (
-          <motion.img
-            src={product.images[0]}
-            alt={product.name}
-            className="h-full w-full object-cover"
-            style={{
-              transform: isHovered ? 'scale(1.06)' : 'scale(1)',
-              transition: 'transform 0.7s cubic-bezier(0.19, 1, 0.22, 1)',
-            }}
-          />
+        {product.images && product.images.length > 0 ? (
+          <>
+            <motion.img
+              key={currentImageIndex}
+              src={product.images[currentImageIndex]}
+              alt={product.name}
+              className="h-full w-full object-cover"
+              initial={{ opacity: 0.5 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                transform: isHovered ? 'scale(1.06)' : 'scale(1)',
+                transition: 'transform 0.7s cubic-bezier(0.19, 1, 0.22, 1)',
+              }}
+            />
+            {/* Image navigation arrows */}
+            {imageCount > 1 && isHovered && (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i => (i - 1 + imageCount) % imageCount); }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-background/70 backdrop-blur-sm rounded-full p-1 shadow-md hover:bg-background/90 transition-colors"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i => (i + 1) % imageCount); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-background/70 backdrop-blur-sm rounded-full p-1 shadow-md hover:bg-background/90 transition-colors"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </>
+            )}
+            {/* Dot indicators */}
+            {imageCount > 1 && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1">
+                {product.images.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i); }}
+                    className={`w-2 h-2 rounded-full transition-colors ${i === currentImageIndex ? 'bg-primary' : 'bg-background/60'}`}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <motion.div 
             className="flex h-full w-full items-center justify-center text-6xl select-none"
