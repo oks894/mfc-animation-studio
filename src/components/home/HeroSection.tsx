@@ -6,44 +6,13 @@ import { ArrowRight, Clock } from 'lucide-react';
 import { useActivePromotions } from '@/hooks/usePromotions';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
 
-// Word reveal component for cinematic text animation
-const WordReveal: React.FC<{ text: string; delay?: number; className?: string }> = ({ 
-  text, 
-  delay = 0, 
-  className = '' 
-}) => {
-  const words = text.split(' ');
-  
-  return (
-    <span className={className}>
-      {words.map((word, index) => (
-        <motion.span
-          key={index}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ 
-            duration: 0.6, 
-            delay: delay + index * 0.15,
-            ease: [0.19, 1, 0.22, 1]
-          }}
-          className="inline-block mr-[0.3em]"
-        >
-          {word}
-        </motion.span>
-      ))}
-    </span>
-  );
-};
-
 const HeroSection: React.FC = () => {
   const { data: promotions } = useActivePromotions();
   const { data: settings } = useStoreSettings();
   const { scrollYProgress } = useScroll();
   
-  // Parallax effects based on scroll
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, 100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0.7]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.95]);
 
   const activePromo = promotions?.[0];
 
@@ -51,163 +20,186 @@ const HeroSection: React.FC = () => {
     document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Floating food emojis with parallax
+  const floatingItems = ['🍗', '🍟', '🍔', '🥤', '🌶️', '🍗'];
+
   return (
     <motion.section 
-      style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
-      className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-secondary/10"
+      style={{ y: heroY, opacity: heroOpacity }}
+      className="relative min-h-[90vh] flex items-center overflow-hidden"
     >
-      {/* Ambient Heat Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Warm bloom center */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, ease: [0.19, 1, 0.22, 1] }}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, hsl(35 100% 50% / 0.08) 0%, hsl(15 90% 40% / 0.04) 50%, transparent 70%)',
-            filter: 'blur(80px)',
-          }}
-        />
-        
-        {/* Animated warm gradients */}
-        <motion.div
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-secondary/20 blur-3xl"
-        />
-        <motion.div
-          animate={{
-            y: [0, 30, 0],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-primary/15 blur-3xl"
-        />
-        
-        {/* Subtle steam rising */}
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-8">
-          {[...Array(3)].map((_, i) => (
-            <motion.div
-              key={i}
-              animate={{
-                y: [0, -120],
-                opacity: [0, 0.15, 0],
-                scale: [0.8, 1.2],
-              }}
-              transition={{
-                duration: 4 + i,
-                repeat: Infinity,
-                delay: i * 0.8,
-                ease: 'easeOut',
-              }}
-              className="w-16 h-32 rounded-full bg-foreground/5 blur-xl"
-            />
-          ))}
-        </div>
-      </div>
+      {/* Dark cinematic gradient background */}
+      <div className="absolute inset-0" style={{
+        background: 'linear-gradient(135deg, hsl(0 70% 15%) 0%, hsl(0 50% 8%) 40%, hsl(0 0% 5%) 100%)',
+      }} />
 
-      <div className="container relative py-24 md:py-36">
+      {/* Radial light bloom */}
+      <motion.div
+        animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full"
+        style={{
+          background: 'radial-gradient(circle, hsl(0 60% 30% / 0.3) 0%, hsl(0 50% 15% / 0.1) 50%, transparent 70%)',
+          filter: 'blur(80px)',
+        }}
+      />
+
+      {/* Smoke/steam particles */}
+      {[...Array(5)].map((_, i) => (
+        <motion.div
+          key={`smoke-${i}`}
+          animate={{
+            y: [0, -200],
+            opacity: [0, 0.15, 0],
+            scale: [0.8, 2],
+          }}
+          transition={{
+            duration: 6 + i * 2,
+            repeat: Infinity,
+            delay: i * 1.2,
+            ease: 'easeOut',
+          }}
+          className="absolute w-32 h-48 rounded-full"
+          style={{
+            left: `${20 + i * 15}%`,
+            bottom: '10%',
+            background: 'radial-gradient(ellipse, hsl(0 0% 100% / 0.08) 0%, transparent 70%)',
+            filter: 'blur(30px)',
+          }}
+        />
+      ))}
+
+      {/* Floating food emojis with parallax */}
+      {floatingItems.map((emoji, i) => (
+        <motion.div
+          key={i}
+          animate={{
+            y: [0, -20 - i * 5, 0],
+            x: [0, (i % 2 === 0 ? 10 : -10), 0],
+            rotate: [0, i % 2 === 0 ? 10 : -10, 0],
+          }}
+          transition={{
+            duration: 4 + i,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: i * 0.3,
+          }}
+          className="absolute text-3xl md:text-5xl select-none opacity-20 md:opacity-30"
+          style={{
+            left: `${10 + i * 15}%`,
+            top: `${15 + (i % 3) * 25}%`,
+          }}
+        >
+          {emoji}
+        </motion.div>
+      ))}
+
+      <div className="container relative z-10 py-20 md:py-32">
         <div className="grid gap-12 md:grid-cols-2 md:items-center">
-          {/* Content */}
-          <div className="space-y-6">
-            {/* Store Status */}
+          <div className="space-y-8">
+            {/* Live open/close badge */}
             {settings && (
               <motion.div
-                initial={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
               >
                 <Badge
                   variant={settings.is_open ? "default" : "destructive"}
-                  className="text-sm py-1.5 px-4 shadow-lg"
+                  className="text-sm py-2 px-5 shadow-lg gap-2"
                 >
-                  <Clock className="mr-1.5 h-3.5 w-3.5" />
+                  {settings.is_open && (
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+                    </span>
+                  )}
+                  <Clock className="h-3.5 w-3.5" />
                   {settings.is_open ? 'We are Open!' : 'Currently Closed'}
                   {settings.use_scheduled_hours && settings.is_open && (
-                    <span className="ml-2 opacity-75">
-                      Until {settings.closing_time}
-                    </span>
+                    <span className="ml-1 opacity-75">Until {settings.closing_time}</span>
                   )}
                 </Badge>
               </motion.div>
             )}
 
-            {/* Promo Banner */}
+            {/* Promo */}
             {activePromo && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
-                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                transition={{ delay: 0.5, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
-                className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-5 py-2.5 text-sm font-medium backdrop-blur-sm border border-secondary/30"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+                className="inline-flex items-center gap-2 rounded-full bg-primary/20 px-5 py-2.5 text-sm font-medium backdrop-blur-sm border border-primary/30 text-white"
               >
-                <motion.span 
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  🔥
-                </motion.span>
+                <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }}>🔥</motion.span>
                 {activePromo.title} - {activePromo.discount_percentage}% OFF!
               </motion.div>
             )}
 
-            {/* Headline with word-by-word reveal */}
-            <h1 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-              <WordReveal text="Crispy, Juicy" delay={0.6} />
-              <br />
-              <span className="text-primary">
-                <WordReveal text="Fried Chicken" delay={0.9} />
-              </span>
-              <br />
-              <WordReveal text="Made Fresh Daily" delay={1.2} />
+            {/* Headline - animated text */}
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white">
+              <motion.span
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+                className="block"
+              >
+                Crispy, Juicy
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.0, duration: 0.8 }}
+                className="block text-primary drop-shadow-[0_0_30px_hsl(0_70%_40%/0.6)]"
+              >
+                Fried Chicken
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.4, duration: 0.8 }}
+                className="block text-3xl md:text-4xl lg:text-5xl font-medium text-white/70 mt-2"
+              >
+                Made Fresh Daily
+              </motion.span>
             </h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              transition={{ delay: 1.6, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
-              className="text-lg text-muted-foreground max-w-md"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.7, duration: 0.8 }}
+              className="text-lg text-white/60 max-w-md"
             >
               Experience the perfect crunch with our signature fried chicken. 
               Made with love, served with joy at Viewland Zone II.
             </motion.p>
 
+            {/* CTA buttons with hover glow */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.9, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+              transition={{ delay: 2.0, duration: 0.8 }}
               className="flex flex-wrap gap-4"
             >
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
-              >
-                <Button size="lg" onClick={scrollToMenu} className="group shadow-brand">
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <Button size="lg" onClick={scrollToMenu} className="group shadow-brand text-base px-8 py-6">
                   View Menu
                   <motion.span
                     className="ml-2"
                     animate={{ x: [0, 4, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
                   >
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-5 w-5" />
                   </motion.span>
                 </Button>
               </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
-              >
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <a
                   href={`https://wa.me/${settings?.whatsapp_primary?.replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Button size="lg" variant="outline" className="bg-green-50 border-green-600 text-green-700 hover:bg-green-100 shadow-lg">
+                  <Button size="lg" variant="outline" className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300 text-base px-8 py-6">
                     📞 Call to Order
                   </Button>
                 </a>
@@ -215,88 +207,72 @@ const HeroSection: React.FC = () => {
             </motion.div>
           </div>
 
-          {/* Hero Image - Cinematic Reveal */}
+          {/* Hero visual - large chicken with glow */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }}
-            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-            transition={{ duration: 1.2, delay: 0.5, ease: [0.19, 1, 0.22, 1] }}
-            className="relative"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, delay: 0.5, ease: [0.19, 1, 0.22, 1] }}
+            className="relative hidden md:block"
           >
             <div className="relative aspect-square">
-              {/* Oil shine sweep effect */}
+              {/* Crimson glow behind */}
               <motion.div
-                initial={{ x: '-100%' }}
-                animate={{ x: '200%' }}
-                transition={{ duration: 2, delay: 1.5, ease: [0.19, 1, 0.22, 1] }}
-                className="absolute inset-0 z-20 w-1/4 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 pointer-events-none"
+                animate={{ scale: [1, 1.05, 1], opacity: [0.4, 0.6, 0.4] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute inset-16 rounded-full"
+                style={{
+                  background: 'radial-gradient(circle, hsl(0 70% 35% / 0.4) 0%, transparent 70%)',
+                  filter: 'blur(60px)',
+                }}
               />
               
-              {/* Decorative rings with slow confident rotation */}
+              {/* Decorative rings */}
               <motion.div
                 animate={{ rotate: 360 }}
-                transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 rounded-full border-2 border-dashed border-primary/15"
+                transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
+                className="absolute inset-0 rounded-full border-2 border-dashed border-primary/20"
               />
               <motion.div
                 animate={{ rotate: -360 }}
-                transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-8 rounded-full border-2 border-dashed border-secondary/15"
+                transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
+                className="absolute inset-8 rounded-full border border-dashed border-primary/10"
               />
               
-              {/* Main image container with depth */}
+              {/* Main food emoji */}
               <motion.div 
-                className="absolute inset-16 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center overflow-hidden shadow-warm-glow"
-                animate={{ y: [0, -8, 0] }}
+                className="absolute inset-16 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center shadow-crimson-glow"
+                animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <span className="text-9xl select-none">🍗</span>
+                <span className="text-[120px] select-none">🍗</span>
               </motion.div>
 
-              {/* Floating food elements with weighted motion */}
-              <motion.div
-                animate={{ y: [0, -12, 0], x: [0, 6, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute top-10 right-10 text-4xl select-none drop-shadow-lg"
-              >
-                🍟
-              </motion.div>
-              <motion.div
-                animate={{ y: [0, 10, 0], x: [0, -8, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute bottom-20 left-5 text-4xl select-none drop-shadow-lg"
-              >
-                🍔
-              </motion.div>
-              <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, delay: 0.5, ease: 'easeInOut' }}
-                className="absolute bottom-10 right-20 text-3xl select-none drop-shadow-lg"
-              >
-                🥤
-              </motion.div>
-              
-              {/* Ember particles around food */}
-              {[...Array(6)].map((_, i) => (
+              {/* Side food items */}
+              <motion.div animate={{ y: [0, -15, 0], x: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity }} className="absolute top-8 right-8 text-5xl select-none drop-shadow-2xl">🍟</motion.div>
+              <motion.div animate={{ y: [0, 12, 0], x: [0, -10, 0] }} transition={{ duration: 6, repeat: Infinity }} className="absolute bottom-20 left-4 text-5xl select-none drop-shadow-2xl">🍔</motion.div>
+              <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 4, repeat: Infinity, delay: 0.5 }} className="absolute bottom-8 right-16 text-4xl select-none drop-shadow-2xl">🥤</motion.div>
+
+              {/* Ember particles */}
+              {[...Array(8)].map((_, i) => (
                 <motion.div
                   key={i}
                   animate={{
-                    y: [20, -60],
-                    x: [0, (i % 2 === 0 ? 15 : -15)],
+                    y: [20, -80],
                     opacity: [0, 0.8, 0],
                     scale: [0.5, 1, 0.3],
                   }}
                   transition={{
                     duration: 3,
-                    delay: i * 0.5,
+                    delay: i * 0.4,
                     repeat: Infinity,
                     ease: 'easeOut',
                   }}
                   className="absolute w-1.5 h-1.5 rounded-full"
                   style={{
-                    left: `${40 + i * 8}%`,
-                    bottom: '30%',
-                    background: 'hsl(35 100% 55%)',
-                    boxShadow: '0 0 8px hsl(35 100% 50% / 0.6)',
+                    left: `${35 + i * 6}%`,
+                    bottom: '25%',
+                    background: 'hsl(0 70% 50%)',
+                    boxShadow: '0 0 8px hsl(0 70% 50% / 0.6)',
                   }}
                 />
               ))}

@@ -16,9 +16,8 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { scrollY } = useScroll();
   
-  // Header becomes more solid as user scrolls
-  const headerBg = useTransform(scrollY, [0, 100], [0.6, 0.95]);
-  const headerBlur = useTransform(scrollY, [0, 100], [8, 12]);
+  const headerOpacity = useTransform(scrollY, [0, 100], [0.7, 0.95]);
+  const headerBlur = useTransform(scrollY, [0, 100], [12, 20]);
 
   const isStorePage = location.pathname === '/';
 
@@ -33,9 +32,9 @@ const Header: React.FC = () => {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
-      className="sticky top-0 z-50 w-full border-b"
+      className="sticky top-0 z-50 w-full border-b border-border/50"
       style={{
-        backgroundColor: `hsl(var(--background) / ${headerBg})`,
+        backgroundColor: `hsl(0 0% 6% / ${headerOpacity})`,
         backdropFilter: `blur(${headerBlur}px)`,
       }}
     >
@@ -44,8 +43,7 @@ const Header: React.FC = () => {
           <motion.div
             whileHover={{ rotate: 8, scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-brand"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-crimson-glow"
           >
             <span className="text-xl font-bold">M</span>
           </motion.div>
@@ -72,7 +70,6 @@ const Header: React.FC = () => {
                 )}
               >
                 {link.label}
-                {/* Animated underline */}
                 <motion.span
                   className="absolute bottom-0 left-0 h-0.5 bg-primary rounded-full"
                   initial={{ width: 0 }}
@@ -82,64 +79,32 @@ const Header: React.FC = () => {
               </Link>
             </motion.div>
           ))}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
-            <Link
-              to="/admin"
-              className="relative text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-2"
-            >
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.5 }}>
+            <Link to="/admin" className="relative text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-2">
               Admin
-              <motion.span
-                className="absolute bottom-0 left-0 h-0.5 bg-primary rounded-full"
-                initial={{ width: 0 }}
-                whileHover={{ width: '100%' }}
-                transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
-              />
+              <motion.span className="absolute bottom-0 left-0 h-0.5 bg-primary rounded-full" initial={{ width: 0 }} whileHover={{ width: '100%' }} transition={{ duration: 0.3 }} />
             </Link>
           </motion.div>
         </nav>
 
         <div className="flex items-center gap-3">
-          {/* Store Status Badge */}
           {settings && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-            >
-              <Badge
-                variant={settings.is_open ? "default" : "destructive"}
-                className="hidden sm:flex shadow-sm"
-              >
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}>
+              <Badge variant={settings.is_open ? "default" : "destructive"} className="hidden sm:flex shadow-sm">
                 {settings.is_open ? 'Open' : 'Closed'}
               </Badge>
             </motion.div>
           )}
 
-          {/* Cart Button */}
           {isStorePage && (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-              whileHover={{ scale: 1.05 }} 
-              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 }}
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
             >
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setIsCartOpen(true)}
-                className="relative shadow-sm"
-              >
+              <Button variant="outline" size="icon" onClick={() => setIsCartOpen(true)} className="relative shadow-sm">
                 <ShoppingCart className="h-5 w-5" />
                 {totalItems > 0 && (
-                  <motion.span
-                    key={totalItems}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
+                  <motion.span key={totalItems} initial={{ scale: 0 }} animate={{ scale: 1 }}
                     className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground shadow-lg"
                   >
                     {totalItems}
@@ -149,68 +114,29 @@ const Header: React.FC = () => {
             </motion.div>
           )}
 
-          {/* WhatsApp Contact */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
-            whileHover={{ scale: 1.05 }} 
-            whileTap={{ scale: 0.95 }}
-          >
-            <a
-              href={`https://wa.me/${settings?.whatsapp_primary?.replace(/[^0-9]/g, '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.7 }} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <a href={`https://wa.me/${settings?.whatsapp_primary?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer">
               <Button variant="default" size="icon" className="bg-green-600 hover:bg-green-700 shadow-lg">
                 <Phone className="h-5 w-5" />
               </Button>
             </a>
           </motion.div>
 
-          {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.8, duration: 0.5 }}
-              >
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.8 }}>
+                <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
               </motion.div>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px]">
               <nav className="flex flex-col gap-4 pt-8">
                 {navLinks.map((link, index) => (
-                  <motion.div
-                    key={link.href}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1, duration: 0.5 }}
-                  >
-                    <Link
-                      to={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-lg font-medium transition-colors hover:text-primary block py-2"
-                    >
-                      {link.label}
-                    </Link>
+                  <motion.div key={link.href} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.1 }}>
+                    <Link to={link.href} onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium transition-colors hover:text-primary block py-2">{link.label}</Link>
                   </motion.div>
                 ))}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
-                >
-                  <Link
-                    to="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-lg font-medium transition-colors hover:text-primary block py-2"
-                  >
-                    Admin
-                  </Link>
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+                  <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium transition-colors hover:text-primary block py-2">Admin</Link>
                 </motion.div>
               </nav>
             </SheetContent>
