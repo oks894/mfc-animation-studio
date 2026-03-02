@@ -4,6 +4,7 @@ import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
 import PromoBanner from '@/components/home/PromoBanner';
 import ProductGrid from '@/components/products/ProductGrid';
+import ReviewsSection from '@/components/home/ReviewsSection';
 import CartSidebar from '@/components/cart/CartSidebar';
 import WhatsAppButton from '@/components/common/WhatsAppButton';
 import StoreClosedBanner from '@/components/common/StoreClosedBanner';
@@ -16,20 +17,10 @@ const Index: React.FC = () => {
 
   return (
     <>
-      {/* Cinematic Page Loader */}
       <AnimatePresence>
-        {isLoading && (
-          <CinematicLoader 
-            onComplete={() => setIsLoading(false)} 
-            minDuration={2500}
-          />
-        )}
+        {isLoading && <CinematicLoader onComplete={() => setIsLoading(false)} minDuration={2500} />}
       </AnimatePresence>
-
-      {/* Film Grain Overlay - Always present */}
       <FilmGrain />
-
-      {/* Main Content */}
       <motion.div 
         className="min-h-screen flex flex-col"
         initial={{ opacity: 0 }}
@@ -44,6 +35,7 @@ const Index: React.FC = () => {
           <section id="menu">
             <ProductGrid />
           </section>
+          <ReviewsSection />
         </main>
         <Footer />
         <CartSidebar />

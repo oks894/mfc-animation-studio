@@ -5,7 +5,6 @@ import { useStoreSettings } from '@/hooks/useStoreSettings';
 
 const WhatsAppButton: React.FC = () => {
   const { data: settings } = useStoreSettings();
-
   const whatsappNumber = settings?.whatsapp_primary?.replace(/[^0-9]/g, '') || '919774046387';
 
   return (
@@ -20,9 +19,9 @@ const WhatsAppButton: React.FC = () => {
       className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition-colors"
     >
       <MessageCircle className="h-7 w-7" />
-      
-      {/* Pulse animation */}
+      {/* Pulse ring */}
       <span className="absolute -inset-1 rounded-full bg-green-500/30 animate-ping" />
+      <span className="absolute -inset-2 rounded-full border-2 border-green-500/20 animate-pulse-ring" />
     </motion.a>
   );
 };

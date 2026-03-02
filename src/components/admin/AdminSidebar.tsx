@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   FileText,
+  Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -25,6 +26,7 @@ const navItems = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/promotions', label: 'Promotions', icon: Tag },
+  { href: '/admin/reviews', label: 'Reviews', icon: Star },
   { href: '/admin/content', label: 'Site Content', icon: FileText },
   { href: '/admin/settings', label: 'Store Settings', icon: Settings },
 ];

@@ -121,6 +121,33 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          created_at: string
+          customer_name: string
+          id: string
+          is_approved: boolean
+          rating: number
+          review_text: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          id?: string
+          is_approved?: boolean
+          rating: number
+          review_text: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          id?: string
+          is_approved?: boolean
+          rating?: number
+          review_text?: string
+        }
+        Relationships: []
+      }
       site_content: {
         Row: {
           address: string | null
