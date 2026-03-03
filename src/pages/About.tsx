@@ -1,11 +1,13 @@
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowLeft, Heart, Flame, Award, Users } from 'lucide-react';
+import { Heart, Flame, Award, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useSiteContent } from '@/hooks/useSiteContent';
 import { Skeleton } from '@/components/ui/skeleton';
 import FilmGrain from '@/components/common/FilmGrain';
+import Header from '@/components/layout/Header';
+import CartSidebar from '@/components/cart/CartSidebar';
 
 const features = [
   { icon: Flame, label: 'Authentic Recipes', delay: 0.2 },
@@ -14,13 +16,18 @@ const features = [
   { icon: Users, label: 'Family Tradition', delay: 0.5 },
 ];
 
+const counters = [
+  { value: '5+', label: 'Years', delay: 0.1 },
+  { value: '2000+', label: 'Customers', delay: 0.2 },
+  { value: '20+', label: 'Menu Items', delay: 0.3 },
+];
+
 const About: React.FC = () => {
   const { data: content, isLoading } = useSiteContent('about');
   const { scrollYProgress } = useScroll();
   
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
   const imageScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.1]);
-  const textOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0.7]);
 
   const aboutContent = content as { title: string; content: string; image_url: string | null } | undefined;
 
@@ -28,38 +35,19 @@ const About: React.FC = () => {
     <div className="min-h-screen bg-background relative overflow-hidden">
       <FilmGrain opacity={0.06} />
       
-      {/* Warm ambient background */}
       <motion.div
         style={{ y: backgroundY }}
         className="absolute inset-0 pointer-events-none"
       >
-        <div 
-          className="absolute top-0 left-1/4 w-96 h-96 rounded-full opacity-20"
-          style={{
-            background: 'radial-gradient(circle, hsl(var(--primary) / 0.3) 0%, transparent 70%)',
-            filter: 'blur(100px)',
-          }}
+        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.3) 0%, transparent 70%)', filter: 'blur(100px)' }}
         />
-        <div 
-          className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full opacity-15"
-          style={{
-            background: 'radial-gradient(circle, hsl(var(--secondary) / 0.3) 0%, transparent 70%)',
-            filter: 'blur(80px)',
-          }}
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, hsl(var(--brand-gold) / 0.2) 0%, transparent 70%)', filter: 'blur(80px)' }}
         />
       </motion.div>
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xl">
-        <div className="container flex h-16 items-center">
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Menu
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <Header />
 
       <main className="container py-16 relative z-10">
         {/* Hero Section */}
@@ -68,7 +56,6 @@ const About: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, ease: [0.19, 1, 0.22, 1] }}
           className="max-w-4xl mx-auto text-center mb-20"
-          style={{ opacity: textOpacity }}
         >
           {isLoading ? (
             <>
@@ -81,7 +68,7 @@ const About: React.FC = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.2, ease: [0.19, 1, 0.22, 1] }}
-                className="text-5xl md:text-7xl font-bold mb-8 bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent"
+                className="text-5xl md:text-7xl font-black mb-8 text-gradient-gold"
               >
                 {aboutContent?.title || 'About Us'}
               </motion.h1>
@@ -97,7 +84,30 @@ const About: React.FC = () => {
           )}
         </motion.section>
 
-        {/* Featured Image with Parallax */}
+        {/* Animated Counters */}
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-wrap justify-center gap-12 mb-20"
+        >
+          {counters.map((counter) => (
+            <motion.div
+              key={counter.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: counter.delay, duration: 0.7 }}
+              className="text-center"
+            >
+              <div className="text-4xl md:text-5xl font-black text-gold">{counter.value}</div>
+              <div className="text-sm text-muted-foreground mt-2 uppercase tracking-wider">{counter.label}</div>
+            </motion.div>
+          ))}
+        </motion.section>
+
+        {/* Featured Image */}
         {aboutContent?.image_url && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -106,17 +116,12 @@ const About: React.FC = () => {
             style={{ scale: imageScale }}
             className="relative aspect-video max-w-4xl mx-auto mb-20 rounded-2xl overflow-hidden shadow-2xl"
           >
-            <img
-              src={aboutContent.image_url}
-              alt="About MFC"
-              className="w-full h-full object-cover"
-            />
-            {/* Warm overlay */}
+            <img src={aboutContent.image_url} alt="About MFC" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
           </motion.div>
         )}
 
-        {/* Features Grid with Stroke-Draw Icons */}
+        {/* Features Grid */}
         <motion.section
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -124,36 +129,19 @@ const About: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
         >
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <motion.div
               key={feature.label}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ 
-                duration: 0.8, 
-                delay: feature.delay,
-                ease: [0.19, 1, 0.22, 1] 
-              }}
+              transition={{ duration: 0.8, delay: feature.delay, ease: [0.19, 1, 0.22, 1] }}
               whileHover={{ y: -8 }}
               className="flex flex-col items-center text-center group"
             >
-              <motion.div
-                initial={{ pathLength: 0 }}
-                whileInView={{ pathLength: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.5, delay: feature.delay + 0.2 }}
-                className="relative mb-4 p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 group-hover:from-primary/20 group-hover:to-secondary/20 transition-all duration-500"
-              >
-                <feature.icon className="h-8 w-8 text-primary" strokeWidth={1.5} />
-                {/* Glow effect */}
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{
-                    background: 'radial-gradient(circle, hsl(var(--primary) / 0.2) 0%, transparent 70%)',
-                    filter: 'blur(10px)',
-                  }}
-                />
-              </motion.div>
+              <div className="relative mb-4 p-4 rounded-2xl bg-card border border-border/50 group-hover:border-[hsl(var(--brand-gold)/0.3)] transition-all duration-500">
+                <feature.icon className="h-8 w-8 text-gold" strokeWidth={1.5} />
+              </div>
               <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors duration-300">
                 {feature.label}
               </span>
@@ -187,12 +175,21 @@ const About: React.FC = () => {
           className="text-center mt-16"
         >
           <Link to="/">
-            <Button size="lg" className="shadow-brand">
+            <Button
+              size="lg"
+              className="font-bold shadow-gold-glow"
+              style={{
+                background: 'linear-gradient(135deg, hsl(var(--brand-gold)) 0%, hsl(35 80% 48%) 100%)',
+                color: 'hsl(0 0% 5%)',
+              }}
+            >
               Order Now
             </Button>
           </Link>
         </motion.div>
       </main>
+
+      <CartSidebar />
     </div>
   );
 };

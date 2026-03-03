@@ -31,8 +31,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
     if (product.in_stock && !isAdding) {
       setIsAdding(true);
       addItem(product);
-      
-      // Reset after animation
       setTimeout(() => setIsAdding(false), 600);
     }
   };
@@ -49,26 +47,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative overflow-hidden rounded-xl border bg-card transition-all duration-700 ease-cinematic"
+      className="group relative overflow-hidden rounded-xl border border-border/50 bg-card transition-all duration-700 ease-cinematic"
       style={{
         boxShadow: isHovered 
-          ? '0 25px 50px -12px hsl(25 95% 55% / 0.2), 0 0 30px hsl(45 100% 50% / 0.1)'
-          : '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+          ? '0 25px 50px -12px hsl(var(--brand-gold) / 0.15), 0 0 0 1px hsl(var(--brand-gold) / 0.15)'
+          : '0 4px 6px -1px rgb(0 0 0 / 0.2)',
         transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
       }}
     >
-      {/* Warm glow effect on hover */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isHovered ? 1 : 0 }}
-        transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
-        className="absolute -inset-1 rounded-xl pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle at center, hsl(35 100% 50% / 0.15) 0%, transparent 70%)',
-          filter: 'blur(20px)',
-        }}
-      />
-
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-muted">
         {product.images && product.images.length > 0 ? (
@@ -86,7 +72,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
                 transition: 'transform 0.7s cubic-bezier(0.19, 1, 0.22, 1)',
               }}
             />
-            {/* Image navigation arrows */}
             {imageCount > 1 && isHovered && (
               <>
                 <button
@@ -103,7 +88,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
                 </button>
               </>
             )}
-            {/* Dot indicators */}
             {imageCount > 1 && (
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1">
                 {product.images.map((_, i) => (
@@ -134,43 +118,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
               animate={{ x: '200%' }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.2, ease: [0.19, 1, 0.22, 1] }}
-              className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12 pointer-events-none"
+              className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 pointer-events-none"
             />
-          )}
-        </AnimatePresence>
-
-        {/* Ember sparks on hover */}
-        <AnimatePresence>
-          {isHovered && (
-            <>
-              {[...Array(4)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ 
-                    y: 20, 
-                    x: 20 + i * 30, 
-                    opacity: 0,
-                    scale: 0 
-                  }}
-                  animate={{ 
-                    y: -40, 
-                    opacity: [0, 1, 0],
-                    scale: [0, 1, 0.5]
-                  }}
-                  exit={{ opacity: 0 }}
-                  transition={{
-                    duration: 1.5,
-                    delay: i * 0.15,
-                    ease: 'easeOut',
-                  }}
-                  className="absolute bottom-8 w-1 h-1 rounded-full pointer-events-none"
-                  style={{
-                    background: 'hsl(35 100% 55%)',
-                    boxShadow: '0 0 6px hsl(35 100% 50% / 0.8)',
-                  }}
-                />
-              ))}
-            </>
           )}
         </AnimatePresence>
 
@@ -205,12 +154,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
             y: isHovered ? 0 : 30 
           }}
           transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
-          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-foreground/70 to-transparent p-4"
+          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/80 to-transparent p-4"
         >
-          <motion.div
-            whileTap={{ scale: 0.96 }}
-            transition={{ duration: 0.2 }}
-          >
+          <motion.div whileTap={{ scale: 0.96 }} transition={{ duration: 0.2 }}>
             <Button
               onClick={handleAddToCart}
               disabled={!product.in_stock}
@@ -249,7 +195,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
               key={discountedPrice}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-lg font-bold text-primary"
+              className="text-lg font-black text-gold"
             >
               ₹{discountedPrice.toFixed(2)}
             </motion.span>

@@ -24,13 +24,11 @@ const ProductGrid: React.FC = () => {
   });
 
   return (
-    <section className="py-16 relative">
+    <section className="py-20 relative">
       {/* Background ambient effect */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
-          animate={{
-            opacity: [0.02, 0.04, 0.02],
-          }}
+          animate={{ opacity: [0.02, 0.04, 0.02] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
           className="absolute left-1/4 top-1/3 w-[600px] h-[600px] rounded-full"
           style={{
@@ -41,18 +39,19 @@ const ProductGrid: React.FC = () => {
       </div>
 
       <div className="container relative z-10">
-        {/* Section Header */}
+        {/* Section Header with gold accent */}
         <motion.div
           initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
           whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
-          className="text-center mb-10"
+          className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold">
-            Our <span className="text-primary">Menu</span>
+            Our <span className="text-gradient-gold">Best Sellers</span>
           </h2>
-          <p className="text-muted-foreground mt-2 max-w-md mx-auto">
+          <div className="mt-3 h-0.5 w-16 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, transparent, hsl(var(--brand-gold)), transparent)' }} />
+          <p className="text-muted-foreground mt-4 max-w-md mx-auto">
             Discover our selection of crispy, delicious fried chicken and sides
           </p>
         </motion.div>
@@ -65,13 +64,12 @@ const ProductGrid: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.1, ease: [0.19, 1, 0.22, 1] }}
           className="mb-10 space-y-6"
         >
-          {/* Search Input with premium interaction */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
             <motion.div 
               className="relative flex-1 max-w-lg mx-auto w-full"
               animate={{
                 boxShadow: isSearchFocused 
-                  ? '0 0 0 2px hsl(var(--primary) / 0.2), 0 10px 40px -10px hsl(var(--primary) / 0.2)'
+                  ? '0 0 0 2px hsl(var(--brand-gold) / 0.2), 0 10px 40px -10px hsl(var(--brand-gold) / 0.15)'
                   : '0 4px 6px -1px rgb(0 0 0 / 0.1)',
               }}
               style={{ borderRadius: '0.75rem' }}
@@ -91,25 +89,10 @@ const ProductGrid: React.FC = () => {
                 onBlur={() => setIsSearchFocused(false)}
                 className="pl-11 h-12 text-base border-2 transition-all duration-300 bg-card/80 backdrop-blur-sm"
               />
-              {/* Glass effect on focus */}
-              <AnimatePresence>
-                {isSearchFocused && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 -z-10 rounded-xl"
-                    style={{
-                      background: 'linear-gradient(135deg, hsl(var(--primary) / 0.05) 0%, hsl(var(--secondary) / 0.05) 100%)',
-                      filter: 'blur(20px)',
-                    }}
-                  />
-                )}
-              </AnimatePresence>
             </motion.div>
           </div>
 
-          {/* Category Filters with mask-based reveal */}
+          {/* Category Filters */}
           <motion.div 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -150,7 +133,6 @@ const ProductGrid: React.FC = () => {
                   className="transition-all duration-300 shadow-sm relative overflow-hidden"
                 >
                   {category.name}
-                  {/* Active category underline */}
                   {selectedCategory === category.id && (
                     <motion.div
                       layoutId="categoryUnderline"
