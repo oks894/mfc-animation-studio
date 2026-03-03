@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
+import WhyChooseSection from '@/components/home/WhyChooseSection';
 import PromoBanner from '@/components/home/PromoBanner';
 import ProductGrid from '@/components/products/ProductGrid';
 import ReviewsSection from '@/components/home/ReviewsSection';
 import CartSidebar from '@/components/cart/CartSidebar';
 import WhatsAppButton from '@/components/common/WhatsAppButton';
+import MobileOrderBar from '@/components/common/MobileOrderBar';
 import StoreClosedBanner from '@/components/common/StoreClosedBanner';
 import CinematicLoader from '@/components/common/CinematicLoader';
 import FilmGrain from '@/components/common/FilmGrain';
@@ -31,6 +33,7 @@ const Index: React.FC = () => {
         <Header />
         <main className="flex-1">
           <HeroSection />
+          <WhyChooseSection />
           <PromoBanner />
           <section id="menu">
             <ProductGrid />
@@ -40,6 +43,7 @@ const Index: React.FC = () => {
         <Footer />
         <CartSidebar />
         <WhatsAppButton />
+        <MobileOrderBar />
       </motion.div>
     </>
   );

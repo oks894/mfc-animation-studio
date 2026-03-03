@@ -16,8 +16,8 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { scrollY } = useScroll();
   
-  const headerOpacity = useTransform(scrollY, [0, 100], [0.7, 0.95]);
-  const headerBlur = useTransform(scrollY, [0, 100], [12, 20]);
+  const headerOpacity = useTransform(scrollY, [0, 100], [0.6, 0.92]);
+  const headerBlur = useTransform(scrollY, [0, 100], [12, 24]);
 
   const isStorePage = location.pathname === '/';
 
@@ -32,9 +32,9 @@ const Header: React.FC = () => {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
-      className="sticky top-0 z-50 w-full border-b border-border/50"
+      className="sticky top-0 z-50 w-full border-b border-border/30"
       style={{
-        backgroundColor: `hsl(0 0% 6% / ${headerOpacity})`,
+        backgroundColor: `hsl(0 0% 4% / ${headerOpacity})`,
         backdropFilter: `blur(${headerBlur}px)`,
       }}
     >
@@ -43,7 +43,8 @@ const Header: React.FC = () => {
           <motion.div
             whileHover={{ rotate: 8, scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-crimson-glow"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground"
+            style={{ boxShadow: '0 0 20px hsl(var(--primary) / 0.3), 0 0 40px hsl(var(--brand-gold) / 0.1)' }}
           >
             <span className="text-xl font-bold">M</span>
           </motion.div>
@@ -79,18 +80,12 @@ const Header: React.FC = () => {
               </Link>
             </motion.div>
           ))}
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.5 }}>
-            <Link to="/admin" className="relative text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-2">
-              Admin
-              <motion.span className="absolute bottom-0 left-0 h-0.5 bg-primary rounded-full" initial={{ width: 0 }} whileHover={{ width: '100%' }} transition={{ duration: 0.3 }} />
-            </Link>
-          </motion.div>
         </nav>
 
         <div className="flex items-center gap-3">
           {settings && (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}>
-              <Badge variant={settings.is_open ? "default" : "destructive"} className="hidden sm:flex shadow-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }}>
+              <Badge variant={settings.is_open ? "default" : "destructive"} className="hidden sm:flex shadow-sm text-xs">
                 {settings.is_open ? 'Open' : 'Closed'}
               </Badge>
             </motion.div>
@@ -98,10 +93,10 @@ const Header: React.FC = () => {
 
           {isStorePage && (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 }}
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}
               whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
             >
-              <Button variant="outline" size="icon" onClick={() => setIsCartOpen(true)} className="relative shadow-sm">
+              <Button variant="outline" size="icon" onClick={() => setIsCartOpen(true)} className="relative shadow-sm border-border/50">
                 <ShoppingCart className="h-5 w-5" />
                 {totalItems > 0 && (
                   <motion.span key={totalItems} initial={{ scale: 0 }} animate={{ scale: 1 }}
@@ -114,7 +109,7 @@ const Header: React.FC = () => {
             </motion.div>
           )}
 
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.7 }} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 }} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <a href={`https://wa.me/${settings?.whatsapp_primary?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer">
               <Button variant="default" size="icon" className="bg-green-600 hover:bg-green-700 shadow-lg">
                 <Phone className="h-5 w-5" />
@@ -124,7 +119,7 @@ const Header: React.FC = () => {
 
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.8 }}>
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.7 }}>
                 <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
               </motion.div>
             </SheetTrigger>
@@ -136,7 +131,7 @@ const Header: React.FC = () => {
                   </motion.div>
                 ))}
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-                  <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium transition-colors hover:text-primary block py-2">Admin</Link>
+                  <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium transition-colors hover:text-primary block py-2 text-muted-foreground">Admin</Link>
                 </motion.div>
               </nav>
             </SheetContent>

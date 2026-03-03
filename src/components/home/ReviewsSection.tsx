@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Send, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Star, Send, CheckCircle, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -53,9 +53,10 @@ const StarRating: React.FC<{ rating: number; onRate?: (r: number) => void; inter
           <Star
             className={`${size} transition-colors duration-200 ${
               star <= (hover || rating)
-                ? 'fill-yellow-400 text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,0.5)]'
-                : 'text-muted-foreground/30'
+                ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]'
+                : 'text-muted-foreground/20'
             }`}
+            fill={star <= (hover || rating) ? 'currentColor' : 'none'}
           />
         </motion.button>
       ))}
@@ -69,25 +70,34 @@ const ReviewCard: React.FC<{ review: Review; index: number }> = ({ review, index
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ delay: index * 0.1, duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
-    whileHover={{ y: -4, boxShadow: '0 20px 40px -12px hsl(0 70% 32% / 0.15)' }}
-    className="rounded-xl border bg-card p-6 transition-all duration-500 min-w-[300px] max-w-[380px] flex-shrink-0"
+    whileHover={{ y: -4 }}
+    className="rounded-xl border border-border/50 bg-card p-6 transition-all duration-500 min-w-[300px] max-w-[380px] flex-shrink-0 hover:border-[hsl(var(--brand-gold)/0.2)]"
+    style={{
+      boxShadow: '0 4px 20px -4px hsl(0 0% 0% / 0.3)',
+    }}
   >
-    <div className="flex items-start gap-3 mb-4">
-      <div className={`flex h-10 w-10 items-center justify-center rounded-full text-white text-sm font-bold ${getAvatarColor(review.customer_name)}`}>
+    {/* Quote decoration */}
+    <Quote className="h-6 w-6 text-gold/20 mb-3" />
+
+    <p className="text-sm text-muted-foreground leading-relaxed mb-4 italic">&ldquo;{review.review_text}&rdquo;</p>
+
+    <div className="flex items-center gap-3">
+      <div className={`flex h-9 w-9 items-center justify-center rounded-full text-white text-xs font-bold ${getAvatarColor(review.customer_name)}`}>
         {getInitials(review.customer_name)}
       </div>
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h4 className="font-semibold text-sm">{review.customer_name}</h4>
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-green-500/30 text-green-600">
+          <h4 className="font-semibold text-sm truncate">{review.customer_name}</h4>
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-green-500/30 text-green-600 shrink-0">
             <CheckCircle className="h-2.5 w-2.5 mr-0.5" /> Verified
           </Badge>
         </div>
-        <StarRating rating={review.rating} size="h-3.5 w-3.5" />
+        <div className="flex items-center gap-2 mt-0.5">
+          <StarRating rating={review.rating} size="h-3 w-3" />
+          <span className="text-[11px] text-muted-foreground/40">{new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+        </div>
       </div>
     </div>
-    <p className="text-sm text-muted-foreground leading-relaxed">{review.review_text}</p>
-    <p className="text-xs text-muted-foreground/50 mt-3">{new Date(review.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
   </motion.div>
 );
 
@@ -145,8 +155,8 @@ const ReviewsSection: React.FC = () => {
     <section className="py-20 relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{
-          background: 'radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)',
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.03]" style={{
+          background: 'radial-gradient(circle, hsl(var(--brand-gold)) 0%, transparent 70%)',
           filter: 'blur(100px)',
         }} />
       </div>
@@ -161,7 +171,7 @@ const ReviewsSection: React.FC = () => {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold">
-            What Our <span className="text-primary">Customers</span> Say
+            What Our <span className="text-gradient-gold">Customers</span> Say
           </h2>
           {reviews.length > 0 && (
             <motion.div
@@ -172,7 +182,7 @@ const ReviewsSection: React.FC = () => {
               className="flex items-center justify-center gap-3 mt-4"
             >
               <StarRating rating={Math.round(avgRating)} size="h-5 w-5" />
-              <span className="text-lg font-bold">{avgRating.toFixed(1)} / 5</span>
+              <span className="text-lg font-bold text-gold">{avgRating.toFixed(1)} / 5</span>
               <span className="text-muted-foreground text-sm">based on {reviews.length} reviews</span>
             </motion.div>
           )}
@@ -197,33 +207,25 @@ const ReviewsSection: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="max-w-lg mx-auto"
         >
-          <div className="rounded-xl border bg-card p-6 md:p-8 shadow-sm">
+          <div className="rounded-xl border border-border/50 bg-card p-6 md:p-8 shadow-sm">
             <h3 className="text-xl font-bold mb-6 text-center">Leave a Review</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Input
-                  placeholder="Your name"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  maxLength={100}
-                  className="h-12"
-                />
-              </div>
+              <Input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} maxLength={100} className="h-12" />
               <div>
                 <label className="text-sm text-muted-foreground mb-2 block">Your Rating</label>
                 <StarRating rating={rating} onRate={setRating} interactive size="h-8 w-8" />
               </div>
-              <div>
-                <Textarea
-                  placeholder="Share your experience..."
-                  value={reviewText}
-                  onChange={e => setReviewText(e.target.value)}
-                  maxLength={500}
-                  rows={4}
-                />
-              </div>
+              <Textarea placeholder="Share your experience..." value={reviewText} onChange={e => setReviewText(e.target.value)} maxLength={500} rows={4} />
               <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-                <Button type="submit" className="w-full h-12 shadow-brand" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  className="w-full h-12 font-bold shadow-gold-glow"
+                  disabled={isSubmitting}
+                  style={{
+                    background: 'linear-gradient(135deg, hsl(var(--brand-gold)) 0%, hsl(35 80% 48%) 100%)',
+                    color: 'hsl(0 0% 5%)',
+                  }}
+                >
                   <Send className="h-4 w-4 mr-2" />
                   {isSubmitting ? 'Submitting...' : 'Submit Review'}
                 </Button>
