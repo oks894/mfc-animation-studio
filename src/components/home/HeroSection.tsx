@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Clock, MapPin, Phone, Download } from 'lucide-react';
 import { useActivePromotions } from '@/hooks/usePromotions';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
+import { Link } from 'react-router-dom';
 
 const wordReveal = {
   hidden: { opacity: 0, y: 30, filter: 'blur(8px)' },
