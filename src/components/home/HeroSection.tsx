@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Clock, MapPin, Phone } from 'lucide-react';
+import { ArrowRight, Clock, MapPin, Phone, Download } from 'lucide-react';
 import { useActivePromotions } from '@/hooks/usePromotions';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
 
