@@ -1,114 +1,73 @@
 
-# MFC Premium 2026 Redesign
 
-## Overview
-A comprehensive visual and UX overhaul of the MFC website to transform it from a basic local restaurant page into a bold, high-converting, premium fast-food brand experience. All existing functionality (cart, admin, reviews, WhatsApp, open/close status) will be preserved.
+# MFC Updates: APK Install, Product Details, Checkout Fees, Contact Map Fix
 
-## Color & Typography Upgrade
+## 1. Install App → APK Download (not PWA "Add to Home Screen")
 
-**Updated Palette:**
-- Background: `#0a0a0a` (near-black) with warm undertones
-- Primary: `#8B1A1A` (deep crimson) -- kept
-- Gold accent: `#D4A853` (warm gold for CTAs and highlights)
-- Card surfaces: `#141414` with subtle warm tint
-- Text: `#F5F0EB` (warm white, not pure white)
+Replace the current PWA install prompt on `/install` and hero section with a direct APK download approach. Since we can't compile a native APK from Lovable, the best approach is:
+- Use a **Trusted Web Activity (TWA) wrapper** concept — provide a pre-built APK or link to a service like [ApeliApps/Nicegram-style PWA-to-APK wrapper]
+- For now, the practical solution: generate the APK using an external tool (like PWABuilder or BubbleWrap) and host the `.apk` file in the project's public storage
+- Update the Install page to show a **"Download APK"** button that downloads the APK file directly
+- Update HeroSection's "Install App" button to link to the APK download
+- Keep iOS instructions as fallback (since APK is Android-only)
 
-**Font:** Keep Inter/Sora but enforce heavier weights (700-900 for headlines, 400-500 for body).
+**Files:** `src/pages/Install.tsx`, `src/components/home/HeroSection.tsx`
 
-## Section-by-Section Changes
+## 2. Product Detail Modal (click product → show details + ratings)
 
-### 1. Hero Section (HeroSection.tsx) -- Full Rebuild
-- Replace emoji-based hero with a bold typographic layout
-- New headline: **"Ukhrul's Crispiest Fried Chicken"** with word-by-word animated reveal
-- Subheadline: "Handcrafted daily. Loved by thousands."
-- Three CTA buttons in a row: **Order Now** (gold, primary), **Get Directions** (outline), **Call Now** (green)
-- Animated stats strip below CTAs: "2000+ Customers Served", "5+ Years", "4.8 Rating"
-- Remove floating food emojis; replace with subtle radial gradient pulses and a warm golden light bloom
-- Keep open/close badge and promo badge
+When a user taps a product card, open a **product detail sheet/dialog** showing:
+- Full product image carousel (swipeable if multiple images)
+- Product name, description, category
+- Price with discount
+- Add to cart / quantity stepper
+- Product-specific reviews/ratings (from the reviews table, or a general "rating" display)
 
-### 2. "Why Choose MFC" Section (NEW component: WhyChooseSection.tsx)
-- 4 value blocks in a grid with icons:
-  - "Secret Spice Blend" (Flame icon)
-  - "Fresh, Never Frozen" (Snowflake icon)
-  - "Fast & Hot Delivery" (Truck icon)
-  - "Family Recipe Since Day 1" (Heart icon)
-- Glassmorphism cards with warm border glow on hover
-- Scroll-triggered fade-up entrance
+**New file:** `src/components/products/ProductDetailSheet.tsx`
+**Edit:** `src/components/products/ProductCard.tsx` — add click handler to open detail sheet
 
-### 3. Menu Section (ProductGrid.tsx + ProductCard.tsx) -- Visual Upgrade
-- Section title: "Our Best Sellers" with gold accent underline
-- Product cards: darker card background (`#141414`), larger image area, golden price tag styling
-- Hover effect: warm golden border glow instead of orange, subtle upward lift
-- "Add to Cart" button uses gold accent on hover
-- Remove ember spark animations (too busy), keep oil-shine sweep
+## 3. Checkout: Add Packaging Fee ₹60 + Delivery Fees
 
-### 4. Reviews Section (ReviewsSection.tsx) -- Polish
-- Keep existing functionality
-- Upgrade card styling: add subtle gold star glow, darker card backgrounds
-- Add quote marks decoration to review text
+Update the checkout order summary to include:
+- **Packaging Fee: ₹60** (fixed)
+- **Delivery Base Fee: ₹100** (Hashtag Dropee base)
+- **Delivery Per KM: ₹50/km** (show as info, user enters distance or it's estimated)
+- Add a **distance input** (km) so the delivery cost can be calculated
+- Update total calculation: `subtotal - discount + packaging(60) + deliveryBase(100) + (km × 50)`
+- Update WhatsApp message to include these fees
+- Update the database order record to include packaging and delivery fees
 
-### 5. Footer (Footer.tsx) -- Conversion-Focused Rebuild
-- Add a bold pre-footer CTA section: "Ready to Order?" with gold "Order Now" button and "Call Now" secondary
-- Add location text: "Viewland Zone II, Ukhrul"
-- Keep existing contact info and hours grid
-- Add subtle gold divider line
+Also update **CartSidebar** to show packaging fee in the summary.
 
-### 6. About Page (About.tsx) -- Typography & Layout Polish
-- Use shared Header component instead of standalone back button
-- Upgrade heading to use gold gradient text
-- Add animated counter section (Years, Customers, Menu Items)
+**Files:** `src/pages/Checkout.tsx`, `src/lib/whatsapp.ts`, `src/components/cart/CartSidebar.tsx`
 
-### 7. Contact Page (Contact.tsx) -- Same Treatment
-- Use shared Header
-- Upgrade card hover effects to match new gold accent system
+## 4. Fix Contact Page Map 404
 
-### 8. Sticky Mobile Order Bar (NEW: MobileOrderBar.tsx)
-- Fixed bottom bar on mobile only (below md breakpoint)
-- Shows: "Order Now" button (gold), Phone icon, WhatsApp icon
-- Appears after scrolling past hero section
-- Glassmorphism background
+The map shows "Map coming soon" because `contactContent?.map_embed_url` is null in the database. Fix by:
+- Providing a **default Google Maps embed URL** for "Viewland Zone II, Ukhrul" as fallback directly in the Contact component
+- The fallback URL: `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3581.5!2d94.3667!3d25.1167!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDA3JzAwLjEiTiA5NMKwMjInMDAuMSJF!5e0!3m2!1sen!2sin!4v1`
 
-### 9. Header (Header.tsx) -- Minor Polish
-- Add gold accent to logo glow instead of crimson-only
-- Remove "Admin" link from public nav (keep at /admin URL, just not in nav)
-- Improve glassmorphism opacity values for better readability
+**File:** `src/pages/Contact.tsx`
 
-### 10. Loading Screen (CinematicLoader.tsx) -- Keep As-Is
-- Already has premium feel, no changes needed
+## 5. UI/UX Polish on Product Cards
 
-## CSS Updates (index.css)
-- Add `--brand-gold` as usable accent throughout
-- Add `.shadow-gold-glow` utility
-- Refine card surface colors for warmer dark tones
-- Add `.text-warm-white` utility class
+Enhance the existing product cards:
+- Make the entire card tappable (opens detail sheet)
+- Add a subtle "tap for details" hint on mobile
+- Slightly larger images on mobile for better visual appeal
 
-## Technical Details
+**File:** `src/components/products/ProductCard.tsx`
 
-### Files to Create:
-1. `src/components/home/WhyChooseSection.tsx` -- 4-block value proposition grid
-2. `src/components/common/MobileOrderBar.tsx` -- sticky bottom CTA bar for mobile
+---
 
-### Files to Modify:
-1. `src/index.css` -- updated CSS variables, new utility classes
-2. `src/components/home/HeroSection.tsx` -- full visual rebuild (same data hooks)
-3. `src/components/products/ProductCard.tsx` -- styling upgrades, gold accents
-4. `src/components/products/ProductGrid.tsx` -- section title upgrade
-5. `src/components/home/ReviewsSection.tsx` -- card styling polish
-6. `src/components/layout/Header.tsx` -- remove admin from nav, polish glassmorphism
-7. `src/components/layout/Footer.tsx` -- add pre-footer CTA section
-8. `src/pages/Index.tsx` -- add WhyChooseSection, MobileOrderBar
-9. `src/pages/About.tsx` -- use shared Header, styling polish
-10. `src/pages/Contact.tsx` -- use shared Header, styling polish
+## Files to Create
+1. `src/components/products/ProductDetailSheet.tsx`
 
-### No Changes To:
-- Admin pages (keep functional, not customer-facing)
-- Cart functionality
-- Database/backend
-- Checkout flow
-- WhatsApp integration logic
+## Files to Edit
+1. `src/pages/Install.tsx` — APK download instead of PWA prompt
+2. `src/components/home/HeroSection.tsx` — update Install App button
+3. `src/components/products/ProductCard.tsx` — add click-to-detail, UI polish
+4. `src/pages/Checkout.tsx` — add packaging ₹60, delivery base ₹100, ₹50/km with distance input
+5. `src/components/cart/CartSidebar.tsx` — show packaging fee in summary
+6. `src/lib/whatsapp.ts` — include fees in WhatsApp message
+7. `src/pages/Contact.tsx` — hardcode default Google Maps embed URL as fallback
 
-## Performance Considerations
-- Remove unnecessary emoji animations (reduce DOM nodes)
-- Reduce ember/particle count in hero
-- Use `will-change` sparingly and only on actively animated elements
-- Keep Framer Motion `viewport={{ once: true }}` for all scroll animations
