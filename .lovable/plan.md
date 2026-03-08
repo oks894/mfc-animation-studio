@@ -1,114 +1,83 @@
 
-# MFC Premium 2026 Redesign
 
-## Overview
-A comprehensive visual and UX overhaul of the MFC website to transform it from a basic local restaurant page into a bold, high-converting, premium fast-food brand experience. All existing functionality (cart, admin, reviews, WhatsApp, open/close status) will be preserved.
+## Plan: Checkout Redesign, Order Confirmation Page, Animated Product Badges
 
-## Color & Typography Upgrade
+Three design upgrades selected by the user. Here is the implementation plan.
 
-**Updated Palette:**
-- Background: `#0a0a0a` (near-black) with warm undertones
-- Primary: `#8B1A1A` (deep crimson) -- kept
-- Gold accent: `#D4A853` (warm gold for CTAs and highlights)
-- Card surfaces: `#141414` with subtle warm tint
-- Text: `#F5F0EB` (warm white, not pure white)
+---
 
-**Font:** Keep Inter/Sora but enforce heavier weights (700-900 for headlines, 400-500 for body).
+### 1. Checkout Page Redesign (`src/pages/Checkout.tsx`)
 
-## Section-by-Section Changes
+Replace the current two-column form with a modern **multi-step wizard** layout:
 
-### 1. Hero Section (HeroSection.tsx) -- Full Rebuild
-- Replace emoji-based hero with a bold typographic layout
-- New headline: **"Ukhrul's Crispiest Fried Chicken"** with word-by-word animated reveal
-- Subheadline: "Handcrafted daily. Loved by thousands."
-- Three CTA buttons in a row: **Order Now** (gold, primary), **Get Directions** (outline), **Call Now** (green)
-- Animated stats strip below CTAs: "2000+ Customers Served", "5+ Years", "4.8 Rating"
-- Remove floating food emojis; replace with subtle radial gradient pulses and a warm golden light bloom
-- Keep open/close badge and promo badge
+**Step 1 - Review Order**: Show cart items as mini cards with images, quantities, and prices. Editable quantities inline. Progress bar at top showing "Review → Details → Payment → Confirm".
 
-### 2. "Why Choose MFC" Section (NEW component: WhyChooseSection.tsx)
-- 4 value blocks in a grid with icons:
-  - "Secret Spice Blend" (Flame icon)
-  - "Fresh, Never Frozen" (Snowflake icon)
-  - "Fast & Hot Delivery" (Truck icon)
-  - "Family Recipe Since Day 1" (Heart icon)
-- Glassmorphism cards with warm border glow on hover
-- Scroll-triggered fade-up entrance
+**Step 2 - Delivery Details**: Clean single-column form with name, phone, address, distance, and special instructions. Floating labels or modern input styling.
 
-### 3. Menu Section (ProductGrid.tsx + ProductCard.tsx) -- Visual Upgrade
-- Section title: "Our Best Sellers" with gold accent underline
-- Product cards: darker card background (`#141414`), larger image area, golden price tag styling
-- Hover effect: warm golden border glow instead of orange, subtle upward lift
-- "Add to Cart" button uses gold accent on hover
-- Remove ember spark animations (too busy), keep oil-shine sweep
+**Step 3 - Payment**: Payment method selection with larger, tappable cards (GPay/UPI vs COD). UPI ID section with copy button.
 
-### 4. Reviews Section (ReviewsSection.tsx) -- Polish
-- Keep existing functionality
-- Upgrade card styling: add subtle gold star glow, darker card backgrounds
-- Add quote marks decoration to review text
+**Step 4 - Summary & Place Order**: Final breakdown (subtotal, discount, packaging, delivery, total) with animated gold total. "Place Order via WhatsApp" button.
 
-### 5. Footer (Footer.tsx) -- Conversion-Focused Rebuild
-- Add a bold pre-footer CTA section: "Ready to Order?" with gold "Order Now" button and "Call Now" secondary
-- Add location text: "Viewland Zone II, Ukhrul"
-- Keep existing contact info and hours grid
-- Add subtle gold divider line
+**UI details:**
+- Sticky progress indicator at top (4 dots/steps with labels)
+- Framer Motion `AnimatePresence` transitions between steps (slide left/right)
+- Mobile-first: single column, full-width inputs, large touch targets
+- Order summary sidebar on desktop (sticky), hidden on mobile (shown in step 4)
+- Back/Next buttons at bottom of each step
 
-### 6. About Page (About.tsx) -- Typography & Layout Polish
-- Use shared Header component instead of standalone back button
-- Upgrade heading to use gold gradient text
-- Add animated counter section (Years, Customers, Menu Items)
+### 2. Order Confirmation Page (`src/pages/OrderConfirmation.tsx` - NEW)
 
-### 7. Contact Page (Contact.tsx) -- Same Treatment
-- Use shared Header
-- Upgrade card hover effects to match new gold accent system
+After placing an order, instead of redirecting to home, navigate to a dedicated confirmation page.
 
-### 8. Sticky Mobile Order Bar (NEW: MobileOrderBar.tsx)
-- Fixed bottom bar on mobile only (below md breakpoint)
-- Shows: "Order Now" button (gold), Phone icon, WhatsApp icon
-- Appears after scrolling past hero section
-- Glassmorphism background
+**Design:**
+- Animated checkmark (Framer Motion scale + fade) at center
+- "Order Placed Successfully!" heading with gold gradient
+- Order details card: items list, total, payment method
+- Estimated time: "Your order will be ready in ~20-30 minutes" (static text)
+- Two CTA buttons: "Track on WhatsApp" (opens WhatsApp) and "Back to Menu"
+- Confetti-like subtle gold particle animation on mount
+- Share button to copy order summary text
 
-### 9. Header (Header.tsx) -- Minor Polish
-- Add gold accent to logo glow instead of crimson-only
-- Remove "Admin" link from public nav (keep at /admin URL, just not in nav)
-- Improve glassmorphism opacity values for better readability
+**Changes needed:**
+- Create `src/pages/OrderConfirmation.tsx`
+- Add route `/order-confirmation` in `App.tsx`
+- Modify `Checkout.tsx` handleSubmit: store order details in state/URL params, navigate to `/order-confirmation` instead of `/`
+- Pass order data via `useNavigate` state
 
-### 10. Loading Screen (CinematicLoader.tsx) -- Keep As-Is
-- Already has premium feel, no changes needed
+### 3. Animated Product Badges (`src/components/products/ProductCard.tsx`)
 
-## CSS Updates (index.css)
-- Add `--brand-gold` as usable accent throughout
-- Add `.shadow-gold-glow` utility
-- Refine card surface colors for warmer dark tones
-- Add `.text-warm-white` utility class
+Add contextual badges on product cards:
 
-## Technical Details
+**Badge types:**
+- **"NEW"** - Products created within last 7 days (compare `created_at` to now). Gold badge with subtle pulse glow animation.
+- **"BEST SELLER"** - Products flagged with a new `is_bestseller` boolean column. Crimson badge with fire icon.
+- **"🌶 SPICY"** - Products flagged with a new `is_spicy` boolean column. Red-orange badge.
 
-### Files to Create:
-1. `src/components/home/WhyChooseSection.tsx` -- 4-block value proposition grid
-2. `src/components/common/MobileOrderBar.tsx` -- sticky bottom CTA bar for mobile
+**Database migration:** Add two columns to `products` table:
+```sql
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_bestseller boolean DEFAULT false;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_spicy boolean DEFAULT false;
+```
 
-### Files to Modify:
-1. `src/index.css` -- updated CSS variables, new utility classes
-2. `src/components/home/HeroSection.tsx` -- full visual rebuild (same data hooks)
-3. `src/components/products/ProductCard.tsx` -- styling upgrades, gold accents
-4. `src/components/products/ProductGrid.tsx` -- section title upgrade
-5. `src/components/home/ReviewsSection.tsx` -- card styling polish
-6. `src/components/layout/Header.tsx` -- remove admin from nav, polish glassmorphism
-7. `src/components/layout/Footer.tsx` -- add pre-footer CTA section
-8. `src/pages/Index.tsx` -- add WhyChooseSection, MobileOrderBar
-9. `src/pages/About.tsx` -- use shared Header, styling polish
-10. `src/pages/Contact.tsx` -- use shared Header, styling polish
+**Badge rendering in ProductCard.tsx:**
+- Positioned absolute top-left of the image area, stacked vertically with gap
+- Subtle entrance animation (`scale-in` + `fade-in`)
+- "NEW" badge: `animate-pulse-glow` class (already defined in CSS)
+- Small, rounded-full pill badges with icon + text
 
-### No Changes To:
-- Admin pages (keep functional, not customer-facing)
-- Cart functionality
-- Database/backend
-- Checkout flow
-- WhatsApp integration logic
+**Admin support in AdminProducts.tsx:**
+- Add "Best Seller" and "Spicy" toggle switches in the product edit form so admins can flag items
 
-## Performance Considerations
-- Remove unnecessary emoji animations (reduce DOM nodes)
-- Reduce ember/particle count in hero
-- Use `will-change` sparingly and only on actively animated elements
-- Keep Framer Motion `viewport={{ once: true }}` for all scroll animations
+---
+
+### Summary of File Changes
+
+| File | Action |
+|------|--------|
+| `src/pages/Checkout.tsx` | Redesign as multi-step wizard |
+| `src/pages/OrderConfirmation.tsx` | **New** - animated confirmation page |
+| `src/App.tsx` | Add `/order-confirmation` route |
+| `src/components/products/ProductCard.tsx` | Add animated badges (New, Best Seller, Spicy) |
+| `src/pages/admin/AdminProducts.tsx` | Add Best Seller / Spicy toggles |
+| DB migration | Add `is_bestseller`, `is_spicy` columns to `products` |
+
