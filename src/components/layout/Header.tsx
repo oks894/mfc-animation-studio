@@ -10,6 +10,25 @@ import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+const NotificationBell: React.FC = () => {
+  const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } = usePushNotifications();
+  if (!isSupported) return null;
+  return (
+    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.45 }}>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={isSubscribed ? unsubscribe : subscribe}
+        disabled={isLoading}
+        className="relative"
+        title={isSubscribed ? 'Disable notifications' : 'Enable notifications'}
+      >
+        {isSubscribed ? <Bell className="h-5 w-5 text-primary" /> : <BellOff className="h-5 w-5 text-muted-foreground" />}
+      </Button>
+    </motion.div>
+  );
+};
+
 const Header: React.FC = () => {
   const location = useLocation();
   const { totalItems, setIsCartOpen } = useCart();
