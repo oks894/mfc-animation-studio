@@ -62,7 +62,7 @@ const Checkout: React.FC = () => {
   const discountAmount = calculateDiscount();
   const deliveryKmFee = deliveryKm * DELIVERY_PER_KM;
   const totalDelivery = DELIVERY_BASE_FEE + deliveryKmFee;
-  const grandTotal = subtotal - discountAmount + PACKAGING_FEE + totalDelivery;
+  const grandTotal = subtotal - discountAmount - couponDiscount + PACKAGING_FEE + totalDelivery;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
