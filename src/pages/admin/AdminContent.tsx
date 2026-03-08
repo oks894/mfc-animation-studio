@@ -340,6 +340,21 @@ const AdminContent: React.FC = () => {
                     </p>
                   </div>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-directions">Google Maps Directions Link</Label>
+                    <Input
+                      id="contact-directions"
+                      value={contactForm.directions_url}
+                      onChange={(e) =>
+                        setContactForm((prev) => ({ ...prev, directions_url: e.target.value }))
+                      }
+                      placeholder="https://www.google.com/maps/dir//..."
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Go to Google Maps → Directions to your store → Copy the URL from browser
+                    </p>
+                  </div>
+
                   <Button
                     onClick={handleContactSave}
                     disabled={updateContent.isPending}

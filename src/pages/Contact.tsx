@@ -125,8 +125,16 @@ const Contact: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6, ease: [0.19, 1, 0.22, 1] }}
-              className="pt-4"
+              className="pt-4 space-y-3"
             >
+              {(contactContent as any)?.directions_url && (
+                <a href={(contactContent as any).directions_url} target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" variant="outline" className="w-full shadow-sm gap-2 mb-3">
+                    <Navigation className="h-5 w-5 text-gold" />
+                    Get Directions
+                  </Button>
+                </a>
+              )}
               <a href={`https://wa.me/${whatsappNumber}?text=Hi! I'd like to place an order.`} target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="w-full shadow-lg gap-2 bg-green-600 hover:bg-green-700 text-white">
                   <MessageCircle className="h-5 w-5" />
