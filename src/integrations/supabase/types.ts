@@ -62,6 +62,33 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_history: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          sent_by: string | null
+          sent_count: number | null
+          title: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          sent_by?: string | null
+          sent_count?: number | null
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          sent_by?: string | null
+          sent_count?: number | null
+          title?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
@@ -251,6 +278,7 @@ export type Database = {
         Row: {
           address: string | null
           content: string
+          directions_url: string | null
           email: string | null
           id: string
           image_url: string | null
@@ -264,6 +292,7 @@ export type Database = {
         Insert: {
           address?: string | null
           content?: string
+          directions_url?: string | null
           email?: string | null
           id?: string
           image_url?: string | null
@@ -277,6 +306,7 @@ export type Database = {
         Update: {
           address?: string | null
           content?: string
+          directions_url?: string | null
           email?: string | null
           id?: string
           image_url?: string | null
