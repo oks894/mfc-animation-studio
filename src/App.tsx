@@ -23,6 +23,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminContent from "./pages/admin/AdminContent";
 import AdminReviews from "./pages/admin/AdminReviews";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminLayout from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
