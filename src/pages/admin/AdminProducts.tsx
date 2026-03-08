@@ -341,7 +341,30 @@ const AdminProducts: React.FC = () => {
                   />
                 </div>
 
-                <div className="sm:col-span-2">
+                <div className="sm:col-span-2 flex items-center justify-between rounded-lg border p-4">
+                  <div>
+                    <Label htmlFor="is_bestseller">Best Seller</Label>
+                    <p className="text-sm text-muted-foreground">Show a "Best Seller" badge</p>
+                  </div>
+                  <Switch
+                    id="is_bestseller"
+                    checked={formData.is_bestseller}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_bestseller: checked }))}
+                  />
+                </div>
+
+                <div className="sm:col-span-2 flex items-center justify-between rounded-lg border p-4">
+                  <div>
+                    <Label htmlFor="is_spicy">Spicy</Label>
+                    <p className="text-sm text-muted-foreground">Show a "🌶 Spicy" badge</p>
+                  </div>
+                  <Switch
+                    id="is_spicy"
+                    checked={formData.is_spicy}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_spicy: checked }))}
+                  />
+                </div>
+
                   <Label>Product Images</Label>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {/* Existing images */}
