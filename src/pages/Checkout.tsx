@@ -416,6 +416,12 @@ const Checkout: React.FC = () => {
                             <span>-₹{discountAmount.toFixed(0)}</span>
                           </div>
                         )}
+                        {couponDiscount > 0 && (
+                          <div className="flex justify-between text-green-500">
+                            <span>Coupon ({couponCode})</span>
+                            <span>-₹{couponDiscount.toFixed(0)}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between">
                           <span className="text-muted-foreground flex items-center gap-1"><Package className="h-3.5 w-3.5" /> Packaging</span>
                           <span>₹{PACKAGING_FEE}</span>
