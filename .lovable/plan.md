@@ -1,91 +1,114 @@
 
+# MFC Premium 2026 Redesign
 
-## Plan: Fix Product Card, Add Store Map, Build Notification Center, Debug Orders API
+## Overview
+A comprehensive visual and UX overhaul of the MFC website to transform it from a basic local restaurant page into a bold, high-converting, premium fast-food brand experience. All existing functionality (cart, admin, reviews, WhatsApp, open/close status) will be preserved.
 
-### 1. Redesign Product Card (Modern, Clean)
+## Color & Typography Upgrade
 
-The current card has issues: the Sheet component renders a default X close button from Radix AND a custom X button in ProductDetailSheet (double X). The card layout feels dated.
+**Updated Palette:**
+- Background: `#0a0a0a` (near-black) with warm undertones
+- Primary: `#8B1A1A` (deep crimson) -- kept
+- Gold accent: `#D4A853` (warm gold for CTAs and highlights)
+- Card surfaces: `#141414` with subtle warm tint
+- Text: `#F5F0EB` (warm white, not pure white)
 
-**ProductCard.tsx** - Complete redesign:
-- Modern vertical card layout on both mobile and desktop (like Swiggy/Zomato style)
-- Larger image area with rounded corners, subtle gradient overlay at bottom
-- Clean typography: product name, short description, price row with ADD button
-- Remove the "Tap for details" text
-- Keep the quantity stepper but make it more compact and modern
+**Font:** Keep Inter/Sora but enforce heavier weights (700-900 for headlines, 400-500 for body).
 
-**ProductDetailSheet.tsx** - Fix double X:
-- Add `SheetTitle` (hidden with `VisuallyHidden`) to fix the accessibility console error
-- Remove the custom X button since `SheetContent` already renders one from sheet.tsx (line 60-63)
-- OR remove the default one from SheetContent and keep the custom styled one
+## Section-by-Section Changes
 
-**sheet.tsx** - Best approach: keep the custom X in ProductDetailSheet (it's styled nicely), suppress the default one by making SheetContent optionally hide its built-in close button via a prop `hideClose`.
+### 1. Hero Section (HeroSection.tsx) -- Full Rebuild
+- Replace emoji-based hero with a bold typographic layout
+- New headline: **"Ukhrul's Crispiest Fried Chicken"** with word-by-word animated reveal
+- Subheadline: "Handcrafted daily. Loved by thousands."
+- Three CTA buttons in a row: **Order Now** (gold, primary), **Get Directions** (outline), **Call Now** (green)
+- Animated stats strip below CTAs: "2000+ Customers Served", "5+ Years", "4.8 Rating"
+- Remove floating food emojis; replace with subtle radial gradient pulses and a warm golden light bloom
+- Keep open/close badge and promo badge
 
-### 2. Add Store Map in Admin (Get Directions)
+### 2. "Why Choose MFC" Section (NEW component: WhyChooseSection.tsx)
+- 4 value blocks in a grid with icons:
+  - "Secret Spice Blend" (Flame icon)
+  - "Fresh, Never Frozen" (Snowflake icon)
+  - "Fast & Hot Delivery" (Truck icon)
+  - "Family Recipe Since Day 1" (Heart icon)
+- Glassmorphism cards with warm border glow on hover
+- Scroll-triggered fade-up entrance
 
-The contact page already shows a Google Maps embed. The admin already has a `map_embed_url` field in the Contact tab of AdminContent.
+### 3. Menu Section (ProductGrid.tsx + ProductCard.tsx) -- Visual Upgrade
+- Section title: "Our Best Sellers" with gold accent underline
+- Product cards: darker card background (`#141414`), larger image area, golden price tag styling
+- Hover effect: warm golden border glow instead of orange, subtle upward lift
+- "Add to Cart" button uses gold accent on hover
+- Remove ember spark animations (too busy), keep oil-shine sweep
 
-**What to add:**
-- In `AdminSettings.tsx`, add a "Store Location" card with a "Get Directions" Google Maps link field (separate from the embed iframe)
-- OR more practically: add a `directions_url` field to `site_content` contact section so customers can tap "Get Directions" and open Google Maps natively
-- Add a "Get Directions" button on the Contact page that opens Google Maps directions
+### 4. Reviews Section (ReviewsSection.tsx) -- Polish
+- Keep existing functionality
+- Upgrade card styling: add subtle gold star glow, darker card backgrounds
+- Add quote marks decoration to review text
 
-**Database migration:** Add `directions_url` column to `site_content` table.
+### 5. Footer (Footer.tsx) -- Conversion-Focused Rebuild
+- Add a bold pre-footer CTA section: "Ready to Order?" with gold "Order Now" button and "Call Now" secondary
+- Add location text: "Viewland Zone II, Ukhrul"
+- Keep existing contact info and hours grid
+- Add subtle gold divider line
 
-**AdminContent.tsx:** Add a "Google Maps Directions Link" input field in the Contact tab.
+### 6. About Page (About.tsx) -- Typography & Layout Polish
+- Use shared Header component instead of standalone back button
+- Upgrade heading to use gold gradient text
+- Add animated counter section (Years, Customers, Menu Items)
 
-**Contact.tsx:** Add a "Get Directions" button that opens the directions URL.
+### 7. Contact Page (Contact.tsx) -- Same Treatment
+- Use shared Header
+- Upgrade card hover effects to match new gold accent system
 
-### 3. Build Admin Notification Center
+### 8. Sticky Mobile Order Bar (NEW: MobileOrderBar.tsx)
+- Fixed bottom bar on mobile only (below md breakpoint)
+- Shows: "Order Now" button (gold), Phone icon, WhatsApp icon
+- Appears after scrolling past hero section
+- Glassmorphism background
 
-Currently notifications are only sent when order status changes. Need a dedicated admin page to compose and broadcast custom messages/promos.
+### 9. Header (Header.tsx) -- Minor Polish
+- Add gold accent to logo glow instead of crimson-only
+- Remove "Admin" link from public nav (keep at /admin URL, just not in nav)
+- Improve glassmorphism opacity values for better readability
 
-**New page: `AdminNotifications.tsx`**
-- Form with Title and Message body fields
-- "Send to All Subscribers" button
-- History of sent notifications (new DB table)
-- Uses the existing `sendNotification` function from `usePushNotifications`
+### 10. Loading Screen (CinematicLoader.tsx) -- Keep As-Is
+- Already has premium feel, no changes needed
 
-**Database migration:** Create `notification_history` table:
-```sql
-CREATE TABLE public.notification_history (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  title text NOT NULL,
-  body text NOT NULL,
-  sent_by uuid REFERENCES auth.users(id),
-  sent_count integer DEFAULT 0,
-  created_at timestamptz DEFAULT now()
-);
-ALTER TABLE public.notification_history ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Admins can manage notifications" ON public.notification_history
-  FOR ALL TO authenticated USING (has_role(auth.uid(), 'admin')) WITH CHECK (has_role(auth.uid(), 'admin'));
-```
+## CSS Updates (index.css)
+- Add `--brand-gold` as usable accent throughout
+- Add `.shadow-gold-glow` utility
+- Refine card surface colors for warmer dark tones
+- Add `.text-warm-white` utility class
 
-**AdminSidebar.tsx:** Add "Notifications" nav item with Bell icon.
+## Technical Details
 
-**App.tsx:** Add route `/admin/notifications`.
+### Files to Create:
+1. `src/components/home/WhyChooseSection.tsx` -- 4-block value proposition grid
+2. `src/components/common/MobileOrderBar.tsx` -- sticky bottom CTA bar for mobile
 
-### 4. Debug Orders API
+### Files to Modify:
+1. `src/index.css` -- updated CSS variables, new utility classes
+2. `src/components/home/HeroSection.tsx` -- full visual rebuild (same data hooks)
+3. `src/components/products/ProductCard.tsx` -- styling upgrades, gold accents
+4. `src/components/products/ProductGrid.tsx` -- section title upgrade
+5. `src/components/home/ReviewsSection.tsx` -- card styling polish
+6. `src/components/layout/Header.tsx` -- remove admin from nav, polish glassmorphism
+7. `src/components/layout/Footer.tsx` -- add pre-footer CTA section
+8. `src/pages/Index.tsx` -- add WhyChooseSection, MobileOrderBar
+9. `src/pages/About.tsx` -- use shared Header, styling polish
+10. `src/pages/Contact.tsx` -- use shared Header, styling polish
 
-The edge function code looks correct. Potential issues:
-- CORS headers missing newer Supabase client headers (`x-supabase-client-platform`, etc.) - the delivery app may be sending these
-- The function uses `verify_jwt = false` which is correct for API key auth
-- Need to test the function to check if it's deployed and responding
+### No Changes To:
+- Admin pages (keep functional, not customer-facing)
+- Cart functionality
+- Database/backend
+- Checkout flow
+- WhatsApp integration logic
 
-**Fix:** Update CORS headers in `orders-api/index.ts` to include the full set of allowed headers. Redeploy the function.
-
-### Summary of Changes
-
-| File | Change |
-|------|--------|
-| `ProductCard.tsx` | Modern vertical card redesign, cleaner layout |
-| `ProductDetailSheet.tsx` | Remove duplicate X button, add hidden SheetTitle for accessibility |
-| `sheet.tsx` | Add optional `hideClose` prop to SheetContent |
-| `site_content` migration | Add `directions_url` column |
-| `AdminContent.tsx` | Add Directions URL input in Contact tab |
-| `Contact.tsx` | Add "Get Directions" button |
-| `notification_history` migration | New table for notification logs |
-| `AdminNotifications.tsx` (new) | Admin page to compose/send broadcast notifications with history |
-| `AdminSidebar.tsx` | Add Notifications nav item |
-| `App.tsx` | Add `/admin/notifications` route |
-| `orders-api/index.ts` | Fix CORS headers, redeploy and test |
-
+## Performance Considerations
+- Remove unnecessary emoji animations (reduce DOM nodes)
+- Reduce ember/particle count in hero
+- Use `will-change` sparingly and only on actively animated elements
+- Keep Framer Motion `viewport={{ once: true }}` for all scroll animations

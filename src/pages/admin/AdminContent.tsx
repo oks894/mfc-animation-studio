@@ -30,6 +30,7 @@ const AdminContent: React.FC = () => {
     phone_1: '',
     phone_2: '',
     map_embed_url: '',
+    directions_url: '',
     image_url: '',
   });
 
@@ -57,6 +58,7 @@ const AdminContent: React.FC = () => {
           phone_1: contactData.phone_1 || '',
           phone_2: contactData.phone_2 || '',
           map_embed_url: contactData.map_embed_url || '',
+          directions_url: (contactData as any).directions_url || '',
           image_url: contactData.image_url || '',
         });
       }
@@ -335,6 +337,21 @@ const AdminContent: React.FC = () => {
                     />
                     <p className="text-xs text-muted-foreground">
                       Go to Google Maps → Share → Embed a map → Copy the src URL
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-directions">Google Maps Directions Link</Label>
+                    <Input
+                      id="contact-directions"
+                      value={contactForm.directions_url}
+                      onChange={(e) =>
+                        setContactForm((prev) => ({ ...prev, directions_url: e.target.value }))
+                      }
+                      placeholder="https://www.google.com/maps/dir//..."
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Go to Google Maps → Directions to your store → Copy the URL from browser
                     </p>
                   </div>
 
