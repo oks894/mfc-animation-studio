@@ -110,11 +110,15 @@ const OrderConfirmation: React.FC = () => {
   const currentStatusIndex = ORDER_STATUSES.indexOf(currentStatus);
 
   const pollStatus = useCallback(async () => {
-    if (!order?.hubOrderId) return;
+    if (!order?.hubOrderId || order.hubOrderId.trim() === '') return;
     try {
-      const { data: statusData } = await supabase.functions.invoke('check-hub-order-status', {
+      const { data: statusData, error } = await supabase.functions.invoke('check-hub-order-status', {
         body: { hub_order_id: order.hubOrderId },
       });
+      if (error) {
+        console.warn('Status poll error:', error);
+        return;
+      }
       if (statusData?.status) {
         setCurrentStatus(normalizeStatus(statusData.status));
       }
