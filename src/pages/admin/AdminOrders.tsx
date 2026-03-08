@@ -172,7 +172,7 @@ const AdminOrders: React.FC = () => {
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
-                              <LinkOff className="h-3 w-3 mr-1" />
+                              <Link2Off className="h-3 w-3 mr-1" />
                               Not Synced
                             </Badge>
                           )}
