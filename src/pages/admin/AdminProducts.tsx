@@ -75,6 +75,8 @@ const AdminProducts: React.FC = () => {
       price: '',
       category_id: '',
       in_stock: true,
+      is_bestseller: false,
+      is_spicy: false,
       images: [],
     });
     setImageFiles([]);
@@ -94,6 +96,8 @@ const AdminProducts: React.FC = () => {
       price: product.price.toString(),
       category_id: product.category_id || '',
       in_stock: product.in_stock,
+      is_bestseller: (product as any).is_bestseller || false,
+      is_spicy: (product as any).is_spicy || false,
       images: product.images || [],
     });
     setIsDialogOpen(true);
