@@ -43,6 +43,10 @@ const Checkout: React.FC = () => {
   });
   const [deliveryKm, setDeliveryKm] = useState<number>(0);
   const [copied, setCopied] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const calculateDiscount = () => {
     let totalDiscount = 0;
