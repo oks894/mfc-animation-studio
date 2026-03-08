@@ -165,6 +165,17 @@ const AdminOrders: React.FC = () => {
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {cfg.label}
                           </Badge>
+                          {order.hub_order_id ? (
+                            <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30">
+                              <Link className="h-3 w-3 mr-1" />
+                              Hub Synced
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
+                              <LinkOff className="h-3 w-3 mr-1" />
+                              Not Synced
+                            </Badge>
+                          )}
                         </div>
                         <span className="text-xs text-muted-foreground">
                           {new Date(order.created_at).toLocaleString()}
