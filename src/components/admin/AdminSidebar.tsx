@@ -28,6 +28,7 @@ const navItems = [
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/promotions', label: 'Promotions', icon: Tag },
   { href: '/admin/orders', label: 'Orders', icon: Package },
+  { href: '/admin/notifications', label: 'Notifications', icon: Bell },
   { href: '/admin/reviews', label: 'Reviews', icon: Star },
   { href: '/admin/content', label: 'Site Content', icon: FileText },
   { href: '/admin/settings', label: 'Store Settings', icon: Settings },

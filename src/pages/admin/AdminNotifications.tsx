@@ -61,7 +61,7 @@ const AdminNotifications: React.FC = () => {
 
       // Log to history
       const { data: { session } } = await supabase.auth.getSession();
-      await supabase.from('notification_history').insert({
+      await (supabase as any).from('notification_history').insert({
         title,
         body,
         sent_by: session?.user?.id || null,
