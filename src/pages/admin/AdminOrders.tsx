@@ -80,6 +80,37 @@ const AdminOrders: React.FC = () => {
 
   const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
 
+  const exportCSV = () => {
+    if (filtered.length === 0) {
+      toast.error('No orders to export');
+      return;
+    }
+    const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'Address', 'Items', 'Subtotal', 'Discount', 'Total', 'Payment Method', 'Status', 'Special Instructions'];
+    const rows = filtered.map(o => [
+      o.id.slice(0, 8).toUpperCase(),
+      new Date(o.created_at).toLocaleString(),
+      o.customer_name,
+      o.customer_phone,
+      `"${o.customer_address.replace(/"/g, '""')}"`,
+      `"${(o.items as any[]).map((i: any) => `${i.name} x${i.quantity}`).join(', ')}"`,
+      o.subtotal,
+      o.discount,
+      o.total,
+      o.payment_method,
+      statusConfig[o.status]?.label || o.status,
+      `"${(o.special_instructions || '').replace(/"/g, '""')}"`,
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${filtered.length} orders`);
+  };
+
   return (
     <AdminSidebar>
       <div className="space-y-6">
