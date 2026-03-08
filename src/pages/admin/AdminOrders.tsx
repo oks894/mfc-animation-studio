@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Package, Clock, Truck, CheckCircle, RefreshCw, Bell, Download } from 'lucide-react';
+import { Package, Clock, Truck, CheckCircle, RefreshCw, Bell, Download, Link, Link2Off } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +23,7 @@ interface Order {
   total: number;
   status: string;
   created_at: string;
+  hub_order_id: string | null;
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -164,6 +165,17 @@ const AdminOrders: React.FC = () => {
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {cfg.label}
                           </Badge>
+                          {order.hub_order_id ? (
+                            <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30">
+                              <Link className="h-3 w-3 mr-1" />
+                              Hub Synced
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
+                              <Link2Off className="h-3 w-3 mr-1" />
+                              Not Synced
+                            </Badge>
+                          )}
                         </div>
                         <span className="text-xs text-muted-foreground">
                           {new Date(order.created_at).toLocaleString()}
