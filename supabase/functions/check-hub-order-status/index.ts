@@ -20,8 +20,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    const url = new URL(req.url);
-    const hubOrderId = url.searchParams.get("hub_order_id");
+    const body = await req.json();
+    const hubOrderId = body.hub_order_id;
 
     if (!hubOrderId) {
       return new Response(
