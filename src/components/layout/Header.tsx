@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Phone, Bell, Menu, X, Info, Download, MessageSquare } from 'lucide-react';
+import { ShoppingCart, Phone, Bell, Menu, X, Info, Download, MessageSquare, Shield } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
