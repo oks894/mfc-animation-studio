@@ -1,4 +1,5 @@
-const CACHE_NAME = 'mfc-cache-v1';
+const SW_VERSION = '2026-03-09-1';
+const CACHE_NAME = `mfc-cache-${SW_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 
 const PRECACHE_URLS = [
@@ -7,37 +8,41 @@ const PRECACHE_URLS = [
   '/icon-512.png',
   '/icon-192.png',
   '/favicon.ico',
-  '/manifest.json'
+  '/manifest.json',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_URLS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
         cacheNames
           .filter((name) => name !== CACHE_NAME)
           .map((name) => caches.delete(name))
-      );
-    })
+      )
+    )
   );
   self.clients.claim();
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match(OFFLINE_URL);
-      })
+      fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(OFFLINE_URL))
     );
   }
 });
