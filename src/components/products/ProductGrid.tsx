@@ -24,7 +24,7 @@ const ProductGrid: React.FC = () => {
   });
 
   return (
-    <section className="py-20 relative">
+    <section className="py-10 md:py-20 relative">
       {/* Background ambient effect */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
