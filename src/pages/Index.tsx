@@ -8,7 +8,7 @@ import ProductGrid from '@/components/products/ProductGrid';
 import ReviewsSection from '@/components/home/ReviewsSection';
 import CartSidebar from '@/components/cart/CartSidebar';
 import WhatsAppButton from '@/components/common/WhatsAppButton';
-import MobileOrderBar from '@/components/common/MobileOrderBar';
+import BottomTabBar from '@/components/common/BottomTabBar';
 import StoreClosedBanner from '@/components/common/StoreClosedBanner';
 import CinematicLoader from '@/components/common/CinematicLoader';
 import FilmGrain from '@/components/common/FilmGrain';
