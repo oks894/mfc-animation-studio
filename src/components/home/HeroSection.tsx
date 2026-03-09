@@ -142,7 +142,7 @@ const HeroSection: React.FC = () => {
           )}
 
           {/* Headline - word-by-word reveal */}
-          <h1 className="text-5xl md:text-6xl lg:text-8xl font-black tracking-tight leading-[0.95]">
+          <h1 className="text-4xl md:text-6xl lg:text-8xl font-black tracking-tight leading-[0.95]">
             {headlineWords.map((word, i) => (
               <motion.span
                 key={word}
