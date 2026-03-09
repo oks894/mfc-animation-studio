@@ -180,7 +180,7 @@ const HeroSection: React.FC = () => {
               <Button
                 size="lg"
                 onClick={scrollToMenu}
-                className="text-base px-8 py-6 font-bold shadow-gold-glow"
+                className="text-sm md:text-base px-6 py-5 md:px-8 md:py-6 font-bold shadow-gold-glow"
                 style={{
                   background: 'linear-gradient(135deg, hsl(var(--brand-gold)) 0%, hsl(35 80% 48%) 100%)',
                   color: 'hsl(0 0% 5%)',
