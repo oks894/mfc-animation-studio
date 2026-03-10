@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
-
 import PromoBanner from '@/components/home/PromoBanner';
-import ProductGrid from '@/components/products/ProductGrid';
+import NewProductsSection from '@/components/home/NewProductsSection';
 import ReviewsSection from '@/components/home/ReviewsSection';
 import CartSidebar from '@/components/cart/CartSidebar';
 import WhatsAppButton from '@/components/common/WhatsAppButton';
@@ -33,10 +32,10 @@ const Index: React.FC = () => {
         <Header />
         <main className="flex-1">
           <HeroSection />
-          
           <PromoBanner />
+          <NewProductsSection />
           <section id="menu">
-            <ProductGrid />
+            {/* Menu section anchor - full shop is at /shop */}
           </section>
           <ReviewsSection />
         </main>

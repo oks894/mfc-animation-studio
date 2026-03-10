@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Package, Clock, Truck, CheckCircle, RefreshCw, Bell, Download, Link, Link2Off } from 'lucide-react';
+import { Package, Clock, Truck, CheckCircle, RefreshCw, Bell, Download, Link, Link2Off, Trash2 } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -76,6 +77,16 @@ const AdminOrders: React.FC = () => {
         `Your order #${orderId.slice(0, 8).toUpperCase()} is now: ${statusLabel}`,
         orderId
       );
+    }
+  };
+
+  const deleteOrder = async (orderId: string) => {
+    const { error } = await supabase.from('orders').delete().eq('id', orderId);
+    if (error) {
+      toast.error('Failed to delete order');
+    } else {
+      toast.success('Order deleted');
+      setOrders(prev => prev.filter(o => o.id !== orderId));
     }
   };
 
@@ -177,9 +188,32 @@ const AdminOrders: React.FC = () => {
                             </Badge>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(order.created_at).toLocaleString()}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(order.created_at).toLocaleString()}
+                          </span>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Order</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete order #{order.id.slice(0, 8).toUpperCase()}? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteOrder(order.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent>

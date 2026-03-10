@@ -13,7 +13,7 @@ const Contact: React.FC = () => {
   const { data: content, isLoading } = useSiteContent('contact');
   const { data: settings } = useStoreSettings();
 
-  const contactContent = content as {
+  const contactContent = content as unknown as {
     title: string;
     content: string;
     address: string | null;
@@ -22,6 +22,7 @@ const Contact: React.FC = () => {
     phone_2: string | null;
     map_embed_url: string | null;
     image_url: string | null;
+    directions_url: string | null;
   } | undefined;
 
   const contactInfo = [
@@ -55,17 +56,17 @@ const Contact: React.FC = () => {
 
       <Header />
 
-      <main className="container py-8 md:py-16 relative z-10">
+      <main className="container py-8 md:py-16 relative z-10 px-4">
         {/* Hero */}
         <motion.section
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, ease: [0.19, 1, 0.22, 1] }}
-          className="max-w-4xl mx-auto text-center mb-16"
+          className="max-w-4xl mx-auto text-center mb-12 md:mb-16"
         >
           {isLoading ? (
             <>
-              <Skeleton className="h-16 w-64 mx-auto mb-6" />
+              <Skeleton className="h-12 md:h-16 w-64 mx-auto mb-6" />
               <Skeleton className="h-6 w-full max-w-xl mx-auto" />
             </>
           ) : (
@@ -74,7 +75,7 @@ const Contact: React.FC = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.2, ease: [0.19, 1, 0.22, 1] }}
-                className="text-3xl md:text-5xl lg:text-7xl font-black mb-6 md:mb-8 text-gradient-gold"
+                className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 md:mb-8 text-gradient-gold"
               >
                 {contactContent?.title || 'Contact Us'}
               </motion.h1>
@@ -82,7 +83,7 @@ const Contact: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.4, ease: [0.19, 1, 0.22, 1] }}
-                className="text-lg md:text-xl text-muted-foreground leading-relaxed"
+                className="text-base md:text-xl text-muted-foreground leading-relaxed"
               >
                 {contactContent?.content || 'We would love to hear from you!'}
               </motion.p>
@@ -90,9 +91,9 @@ const Contact: React.FC = () => {
           )}
         </motion.section>
 
-        <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 max-w-6xl mx-auto">
           {/* Contact Info Cards */}
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {contactInfo.map((item) => (
               <motion.div
                 key={item.label}
@@ -100,20 +101,20 @@ const Contact: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: item.delay, ease: [0.19, 1, 0.22, 1] }}
                 whileHover={{ x: 8, scale: 1.02 }}
-                className="group p-6 rounded-2xl bg-card border border-border/50 hover:border-[hsl(var(--brand-gold)/0.2)] transition-all duration-500"
+                className="group p-4 md:p-6 rounded-2xl bg-card border border-border/50 hover:border-[hsl(var(--brand-gold)/0.2)] transition-all duration-500"
               >
-                <div className="flex items-start gap-4">
-                  <div className="relative p-3 rounded-xl bg-card border border-border/50 group-hover:border-[hsl(var(--brand-gold)/0.3)] transition-colors duration-300">
-                    <item.icon className="h-6 w-6 text-gold" strokeWidth={1.5} />
+                <div className="flex items-start gap-3 md:gap-4">
+                  <div className="relative p-2 md:p-3 rounded-xl bg-card border border-border/50 group-hover:border-[hsl(var(--brand-gold)/0.3)] transition-colors duration-300 flex-shrink-0">
+                    <item.icon className="h-5 w-5 md:h-6 md:w-6 text-gold" strokeWidth={1.5} />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">{item.label}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs md:text-sm text-muted-foreground mb-1">{item.label}</p>
                     {item.href ? (
-                      <a href={item.href} className="text-lg font-medium hover:text-gold transition-colors duration-300">
+                      <a href={item.href} className="text-base md:text-lg font-medium hover:text-gold transition-colors duration-300 break-all">
                         {item.value}
                       </a>
                     ) : (
-                      <p className="text-lg font-medium">{item.value}</p>
+                      <p className="text-base md:text-lg font-medium break-words">{item.value}</p>
                     )}
                   </div>
                 </div>
@@ -127,8 +128,8 @@ const Contact: React.FC = () => {
               transition={{ duration: 0.8, delay: 0.6, ease: [0.19, 1, 0.22, 1] }}
               className="pt-4 space-y-3"
             >
-              {(contactContent as any)?.directions_url && (
-                <a href={(contactContent as any).directions_url} target="_blank" rel="noopener noreferrer">
+              {contactContent?.directions_url && (
+                <a href={contactContent.directions_url} target="_blank" rel="noopener noreferrer">
                   <Button size="lg" variant="outline" className="w-full shadow-sm gap-2 mb-3">
                     <Navigation className="h-5 w-5 text-gold" />
                     Get Directions
@@ -149,7 +150,7 @@ const Contact: React.FC = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.4, ease: [0.19, 1, 0.22, 1] }}
-            className="relative rounded-2xl overflow-hidden shadow-2xl aspect-square lg:aspect-auto lg:h-full min-h-[400px] border border-border/50"
+            className="relative rounded-2xl overflow-hidden shadow-2xl aspect-square lg:aspect-auto lg:h-full min-h-[300px] md:min-h-[400px] border border-border/50"
           >
             <iframe
               src={contactContent?.map_embed_url || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14326.0!2d94.3617!3d25.1167!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3741e3a94d4a5c1f%3A0x5ef5a9f5c5e5c5a5!2sViewland%20Zone%20II%2C%20Ukhrul%2C%20Manipur!5e0!3m2!1sen!2sin!4v1'}

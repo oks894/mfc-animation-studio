@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { MapPin, Phone, Clock, ArrowRight } from 'lucide-react';
+import { MapPin, Phone, Clock, ArrowRight, Users, Calendar, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
 import { useCart } from '@/contexts/CartContext';
@@ -12,6 +12,12 @@ const Footer: React.FC = () => {
   const footerY = useTransform(scrollYProgress, [0.8, 1], [50, 0]);
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  const stats = [
+    { value: settings?.customers_served || '2000+', label: 'Customers Served', icon: Users },
+    { value: settings?.years_running || '5+', label: 'Years Running', icon: Calendar },
+    { value: settings?.average_rating || '4.8', label: 'Average Rating', icon: Star },
+  ];
 
   return (
     <motion.footer
@@ -87,6 +93,28 @@ const Footer: React.FC = () => {
           >
             <MapPin className="h-3.5 w-3.5" /> Viewland Zone II, Ukhrul
           </motion.p>
+        </div>
+      </div>
+
+      {/* Stats Strip */}
+      <div className="border-b border-border/20">
+        <div className="container py-8">
+          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.6 }}
+                className="text-center flex flex-col items-center gap-2"
+              >
+                <stat.icon className="h-5 w-5 text-gold" />
+                <div className="text-2xl md:text-3xl font-black text-gold">{stat.value}</div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
 

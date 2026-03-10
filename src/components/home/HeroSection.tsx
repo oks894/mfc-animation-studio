@@ -16,12 +16,6 @@ const wordReveal = {
   }),
 };
 
-const stats = [
-  { value: '2000+', label: 'Customers Served' },
-  { value: '5+', label: 'Years Running' },
-  { value: '4.8', label: 'Average Rating' },
-];
-
 const HeroSection: React.FC = () => {
   const { data: promotions } = useActivePromotions();
   const { data: settings } = useStoreSettings();
@@ -227,27 +221,6 @@ const HeroSection: React.FC = () => {
                 </Button>
               </Link>
             </motion.div>
-          </motion.div>
-
-          {/* Animated Stats Strip */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.2, duration: 0.8 }}
-            className="flex flex-wrap gap-8 pt-8 border-t border-border/30"
-          >
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2.4 + i * 0.15, duration: 0.6 }}
-                className="text-center"
-              >
-                <div className="text-2xl md:text-3xl font-black text-gold">{stat.value}</div>
-                <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{stat.label}</div>
-              </motion.div>
-            ))}
           </motion.div>
         </div>
       </div>
