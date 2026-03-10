@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Store, Clock, Phone, Users, Key, Copy, Trash2, Plus } from 'lucide-react';
+import { Save, Store, Clock, Phone, Users, Key, Copy, Trash2, Plus, PackageCheck, Truck, Image, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import AddAdminDialog from '@/components/admin/AddAdminDialog';
 import TimeInput12hr from '@/components/ui/time-input-12hr';
 import { useStoreSettings, useUpdateStoreSettings } from '@/hooks/useStoreSettings';
+import { useImageUpload } from '@/hooks/useImageUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -27,6 +28,7 @@ interface ApiKey {
 const AdminSettings: React.FC = () => {
   const { data: settings, isLoading } = useStoreSettings();
   const updateSettings = useUpdateStoreSettings();
+  const { uploadImage, isUploading } = useImageUpload();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [newKeyName, setNewKeyName] = useState('');
   const [loadingKeys, setLoadingKeys] = useState(true);
@@ -40,6 +42,13 @@ const AdminSettings: React.FC = () => {
     upi_id: '',
     whatsapp_primary: '',
     whatsapp_secondary: '',
+    packaging_fee: 60,
+    base_delivery_fee: 100,
+    per_km_delivery_fee: 50,
+    customers_served: '2000+',
+    years_running: '5+',
+    average_rating: '4.8',
+    menu_images: [] as string[],
   });
 
   useEffect(() => {
@@ -53,11 +62,17 @@ const AdminSettings: React.FC = () => {
         upi_id: settings.upi_id || '',
         whatsapp_primary: settings.whatsapp_primary || '',
         whatsapp_secondary: settings.whatsapp_secondary || '',
+        packaging_fee: settings.packaging_fee ?? 60,
+        base_delivery_fee: settings.base_delivery_fee ?? 100,
+        per_km_delivery_fee: settings.per_km_delivery_fee ?? 50,
+        customers_served: settings.customers_served || '2000+',
+        years_running: settings.years_running || '5+',
+        average_rating: settings.average_rating || '4.8',
+        menu_images: settings.menu_images || [],
       });
     }
   }, [settings]);
 
-  // Fetch API keys
   const fetchApiKeys = async () => {
     setLoadingKeys(true);
     const { data } = await supabase.from('api_keys').select('*').order('created_at', { ascending: false });
@@ -94,6 +109,25 @@ const AdminSettings: React.FC = () => {
         ? prev.open_days.filter(d => d !== dayIndex)
         : [...prev.open_days, dayIndex].sort(),
     }));
+  };
+
+  const handleMenuImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    if (formData.menu_images.length + files.length > 4) {
+      toast.error('Maximum 4 menu images allowed');
+      return;
+    }
+    for (const file of Array.from(files)) {
+      const url = await uploadImage(file);
+      if (url) {
+        setFormData(prev => ({ ...prev, menu_images: [...prev.menu_images, url] }));
+      }
+    }
+  };
+
+  const removeMenuImage = (index: number) => {
+    setFormData(prev => ({ ...prev, menu_images: prev.menu_images.filter((_, i) => i !== index) }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -187,8 +221,96 @@ const AdminSettings: React.FC = () => {
             </motion.div>
           )}
 
-          {/* Contact & Payment */}
+          {/* Fees Management */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><PackageCheck className="h-5 w-5" /> Fees Management</CardTitle>
+                <CardDescription>Configure packaging and delivery fees</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <Label htmlFor="packaging_fee">Packaging Fee (₹)</Label>
+                    <Input id="packaging_fee" type="number" value={formData.packaging_fee} onChange={(e) => setFormData(prev => ({ ...prev, packaging_fee: Number(e.target.value) }))} />
+                  </div>
+                  <div>
+                    <Label htmlFor="base_delivery_fee">Base Delivery Fee (₹)</Label>
+                    <Input id="base_delivery_fee" type="number" value={formData.base_delivery_fee} onChange={(e) => setFormData(prev => ({ ...prev, base_delivery_fee: Number(e.target.value) }))} />
+                  </div>
+                  <div>
+                    <Label htmlFor="per_km_delivery_fee">Per KM Fee (₹)</Label>
+                    <Input id="per_km_delivery_fee" type="number" value={formData.per_km_delivery_fee} onChange={(e) => setFormData(prev => ({ ...prev, per_km_delivery_fee: Number(e.target.value) }))} />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">These fees will be applied during checkout</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Homepage Stats */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Truck className="h-5 w-5" /> Homepage Stats</CardTitle>
+                <CardDescription>Customize stats shown on the homepage and footer</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <Label htmlFor="customers_served">Customers Served</Label>
+                    <Input id="customers_served" value={formData.customers_served} onChange={(e) => setFormData(prev => ({ ...prev, customers_served: e.target.value }))} placeholder="2000+" />
+                  </div>
+                  <div>
+                    <Label htmlFor="years_running">Years Running</Label>
+                    <Input id="years_running" value={formData.years_running} onChange={(e) => setFormData(prev => ({ ...prev, years_running: e.target.value }))} placeholder="5+" />
+                  </div>
+                  <div>
+                    <Label htmlFor="average_rating">Average Rating</Label>
+                    <Input id="average_rating" value={formData.average_rating} onChange={(e) => setFormData(prev => ({ ...prev, average_rating: e.target.value }))} placeholder="4.8" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Menu Images */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Image className="h-5 w-5" /> Menu Images</CardTitle>
+                <CardDescription>Upload up to 4 menu images for the homepage</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {formData.menu_images.map((img, index) => (
+                    <div key={index} className="relative aspect-[3/4] rounded-lg overflow-hidden border border-border">
+                      <img src={img} alt={`Menu ${index + 1}`} className="w-full h-full object-cover" />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6"
+                        onClick={() => removeMenuImage(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  {formData.menu_images.length < 4 && (
+                    <label className="aspect-[3/4] rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+                      <Upload className="h-6 w-6 text-muted-foreground mb-1" />
+                      <span className="text-xs text-muted-foreground">{isUploading ? 'Uploading...' : 'Upload'}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleMenuImageUpload} disabled={isUploading} />
+                    </label>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Contact & Payment */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Phone className="h-5 w-5" /> Contact & Payment</CardTitle>
@@ -214,12 +336,12 @@ const AdminSettings: React.FC = () => {
             </Card>
           </motion.div>
 
-          {/* API Keys for Delivery Agents */}
+          {/* API Keys */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Key className="h-5 w-5" /> Delivery API Keys</CardTitle>
-                <CardDescription>Generate API keys for delivery agent apps to receive live orders</CardDescription>
+                <CardDescription>Generate API keys for delivery agent apps</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="p-3 rounded-lg bg-muted text-xs text-muted-foreground space-y-2">
@@ -243,12 +365,10 @@ const AdminSettings: React.FC = () => {
                   </div>
                   <p className="mt-1">Use header: <code>Authorization: Bearer YOUR_API_KEY</code></p>
                 </div>
-
                 <div className="flex gap-2">
                   <Input placeholder="Key name (e.g. Dropee App)" value={newKeyName} onChange={(e) => setNewKeyName(e.target.value)} />
                   <Button type="button" onClick={generateApiKey} size="sm"><Plus className="h-4 w-4 mr-1" /> Generate</Button>
                 </div>
-
                 {loadingKeys ? (
                   <p className="text-sm text-muted-foreground">Loading...</p>
                 ) : apiKeys.length === 0 ? (

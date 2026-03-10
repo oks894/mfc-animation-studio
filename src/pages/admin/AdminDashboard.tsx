@@ -1,49 +1,112 @@
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Package, Tag, DollarSign, TrendingUp } from 'lucide-react';
+import { Package, Tag, DollarSign, TrendingUp, ShoppingCart, Calendar, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProducts } from '@/hooks/useProducts';
 import { usePromotions, useActivePromotions } from '@/hooks/usePromotions';
 import { useStoreSettings } from '@/hooks/useStoreSettings';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Order {
+  id: string;
+  total: number;
+  status: string;
+  created_at: string;
+}
 
 const AdminDashboard: React.FC = () => {
   const { data: products } = useProducts();
   const { data: promotions } = usePromotions();
   const { data: activePromotions } = useActivePromotions();
   const { data: settings } = useStoreSettings();
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const { data } = await supabase
+        .from('orders')
+        .select('id, total, status, created_at')
+        .order('created_at', { ascending: false });
+      setOrders((data as Order[]) || []);
+    };
+    fetchOrders();
+  }, []);
+
+  const now = new Date();
+
+  const analytics = useMemo(() => {
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const weeklyOrders = orders.filter(o => new Date(o.created_at) >= startOfWeek);
+    const monthlyOrders = orders.filter(o => new Date(o.created_at) >= startOfMonth);
+
+    const sum = (arr: Order[]) => arr.reduce((s, o) => s + Number(o.total), 0);
+    const delivered = (arr: Order[]) => arr.filter(o => o.status === 'delivered');
+
+    return {
+      overall: { total: orders.length, revenue: sum(orders), delivered: delivered(orders).length },
+      monthly: { total: monthlyOrders.length, revenue: sum(monthlyOrders), delivered: delivered(monthlyOrders).length },
+      weekly: { total: weeklyOrders.length, revenue: sum(weeklyOrders), delivered: delivered(weeklyOrders).length },
+    };
+  }, [orders, now]);
 
   const stats = [
-    {
-      title: 'Total Products',
-      value: products?.length || 0,
-      icon: Package,
-      color: 'text-blue-600',
-      bg: 'bg-blue-100',
-    },
-    {
-      title: 'In Stock',
-      value: products?.filter(p => p.in_stock).length || 0,
-      icon: TrendingUp,
-      color: 'text-green-600',
-      bg: 'bg-green-100',
-    },
-    {
-      title: 'Active Promotions',
-      value: activePromotions?.length || 0,
-      icon: Tag,
-      color: 'text-orange-600',
-      bg: 'bg-orange-100',
-    },
-    {
-      title: 'Store Status',
-      value: settings?.is_open ? 'Open' : 'Closed',
-      icon: DollarSign,
-      color: settings?.is_open ? 'text-green-600' : 'text-red-600',
-      bg: settings?.is_open ? 'bg-green-100' : 'bg-red-100',
-    },
+    { title: 'Total Products', value: products?.length || 0, icon: Package, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { title: 'In Stock', value: products?.filter(p => p.in_stock).length || 0, icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-100' },
+    { title: 'Active Promotions', value: activePromotions?.length || 0, icon: Tag, color: 'text-orange-600', bg: 'bg-orange-100' },
+    { title: 'Store Status', value: settings?.is_open ? 'Open' : 'Closed', icon: DollarSign, color: settings?.is_open ? 'text-green-600' : 'text-red-600', bg: settings?.is_open ? 'bg-green-100' : 'bg-red-100' },
   ];
+
+  const renderAnalyticsCards = (data: { total: number; revenue: number; delivered: number }) => (
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full p-2 bg-blue-100">
+              <ShoppingCart className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Orders</p>
+              <p className="text-2xl font-bold">{data.total}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full p-2 bg-green-100">
+              <DollarSign className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Revenue</p>
+              <p className="text-2xl font-bold">₹{data.revenue.toLocaleString()}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full p-2 bg-purple-100">
+              <TrendingUp className="h-5 w-5 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Delivered</p>
+              <p className="text-2xl font-bold">{data.delivered}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 
   return (
     <AdminSidebar>
@@ -79,9 +142,32 @@ const AdminDashboard: React.FC = () => {
           ))}
         </div>
 
+        {/* Order Analytics */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Order Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="overall">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="overall">Overall</TabsTrigger>
+                  <TabsTrigger value="monthly">This Month</TabsTrigger>
+                  <TabsTrigger value="weekly">This Week</TabsTrigger>
+                </TabsList>
+                <TabsContent value="overall">{renderAnalyticsCards(analytics.overall)}</TabsContent>
+                <TabsContent value="monthly">{renderAnalyticsCards(analytics.monthly)}</TabsContent>
+                <TabsContent value="weekly">{renderAnalyticsCards(analytics.weekly)}</TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Quick Info */}
         <div className="grid gap-4 md:grid-cols-2">
-          {/* Recent Products */}
           <Card>
             <CardHeader>
               <CardTitle>Recent Products</CardTitle>
@@ -115,7 +201,6 @@ const AdminDashboard: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Active Promotions */}
           <Card>
             <CardHeader>
               <CardTitle>Active Promotions</CardTitle>

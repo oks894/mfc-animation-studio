@@ -49,6 +49,13 @@ export interface StoreSettings {
   whatsapp_secondary: string;
   admin_password_hash: string;
   updated_at: string;
+  packaging_fee: number;
+  base_delivery_fee: number;
+  per_km_delivery_fee: number;
+  customers_served: string;
+  years_running: string;
+  average_rating: string;
+  menu_images: string[];
 }
 
 export interface CartItem {
