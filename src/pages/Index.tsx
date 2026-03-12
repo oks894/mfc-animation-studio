@@ -34,10 +34,8 @@ const Index: React.FC = () => {
         <main className="flex-1">
           <HeroSection />
           <PromoBanner />
+          <MenuPreview />
           <NewProductsSection />
-          <section id="menu">
-            {/* Menu section anchor - full shop is at /shop */}
-          </section>
           <ReviewsSection />
         </main>
         <Footer />
