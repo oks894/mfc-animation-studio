@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { AdminProvider } from "@/contexts/AdminContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 // Lazy-loaded pages — each becomes its own chunk
 const Index = lazy(() => import("./pages/Index"));
@@ -18,6 +19,8 @@ const OrderConfirmation = lazy(() => import("./pages/OrderConfirmation"));
 const TrackOrder = lazy(() => import("./pages/TrackOrder"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Profile = lazy(() => import("./pages/Profile"));
 
 // Admin pages — rarely visited by customers, split separately
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -37,6 +40,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <AuthProvider>
       <AdminProvider>
         <CartProvider>
           <Toaster />
@@ -54,6 +58,8 @@ const App = () => (
                 <Route path="/order-confirmation" element={<OrderConfirmation />} />
                 <Route path="/track-order" element={<TrackOrder />} />
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/profile" element={<Profile />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminLogin />} />
@@ -76,6 +82,7 @@ const App = () => (
           </BrowserRouter>
         </CartProvider>
       </AdminProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

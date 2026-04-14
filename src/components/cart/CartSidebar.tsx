@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Minus, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
+import { Plus, Minus, ShoppingBag, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useCart } from '@/contexts/CartContext';
 import { useActivePromotions } from '@/hooks/usePromotions';
+import { useProducts } from '@/hooks/useProducts';
 import { Separator } from '@/components/ui/separator';
 import { Link } from 'react-router-dom';
 
@@ -30,8 +31,19 @@ const AnimatedNumber: React.FC<{ value: number; prefix?: string }> = ({ value, p
 };
 
 const CartSidebar: React.FC = () => {
-  const { items, isCartOpen, setIsCartOpen, removeItem, updateQuantity, subtotal } = useCart();
+  const { items, isCartOpen, setIsCartOpen, removeItem, updateQuantity, subtotal, addItem } = useCart();
   const { data: promotions } = useActivePromotions();
+  const { data: allProducts } = useProducts();
+
+  // Upsell: suggest items not in cart, prioritizing bestsellers
+  const upsellItems = React.useMemo(() => {
+    if (!allProducts || items.length === 0) return [];
+    const cartIds = new Set(items.map(i => i.product.id));
+    return allProducts
+      .filter(p => !cartIds.has(p.id) && p.in_stock)
+      .sort((a, b) => (b.is_bestseller ? 1 : 0) - (a.is_bestseller ? 1 : 0))
+      .slice(0, 3);
+  }, [allProducts, items]);
 
   // Calculate discount
   const activeDiscount = promotions?.find(p => p.applies_to_all && p.discount_percentage > 0);
@@ -251,6 +263,37 @@ const CartSidebar: React.FC = () => {
               </div>
               <p className="text-xs text-muted-foreground">+ delivery fee at checkout</p>
             </div>
+
+            {/* Upsell Section */}
+            {upsellItems.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold flex items-center gap-1 text-muted-foreground">
+                  <Sparkles className="h-3 w-3" style={{ color: 'hsl(var(--brand-gold))' }} /> Add to your order
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                  {upsellItems.map(product => (
+                    <button
+                      key={product.id}
+                      onClick={() => addItem(product)}
+                      className="flex-shrink-0 w-28 rounded-lg border border-border/50 bg-card p-2 text-left hover:border-primary/50 transition-colors"
+                    >
+                      <div className="h-14 w-full rounded-md bg-muted overflow-hidden mb-1.5">
+                        {product.images?.[0] ? (
+                          <img src={product.images[0]} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center text-xl">🍗</div>
+                        )}
+                      </div>
+                      <p className="text-[11px] font-medium truncate">{product.name}</p>
+                      <div className="flex items-center justify-between mt-0.5">
+                        <span className="text-[11px] font-bold" style={{ color: 'hsl(var(--brand-gold))' }}>₹{product.price}</span>
+                        <Plus className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Link to="/checkout" onClick={() => setIsCartOpen(false)}>
               <motion.div
