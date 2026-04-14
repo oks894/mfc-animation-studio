@@ -155,17 +155,55 @@ const Profile: React.FC = () => {
               </CardContent>
             </Card>
 
+            {/* Loyalty Banner */}
+            {loyalty && (
+              <Card className="border-border/50" style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--brand-gold) / 0.1))' }}>
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ background: 'hsl(var(--brand-gold) / 0.2)' }}>
+                        <Star className="h-5 w-5" style={{ color: 'hsl(var(--brand-gold))' }} />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{loyalty.balance}</p>
+                        <p className="text-xs text-muted-foreground">Loyalty Points</p>
+                      </div>
+                    </div>
+                    {referral && (
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground mb-1">Your referral code</p>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(referral.code);
+                            toast.success('Referral code copied!');
+                          }}
+                          className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-mono font-bold hover:bg-card transition-colors"
+                        >
+                          {referral.code}
+                          <Copy className="h-3 w-3 text-muted-foreground" />
+                        </button>
+                        <p className="text-[10px] text-muted-foreground mt-1">{referral.uses_count} referrals</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Tabs */}
             <Tabs defaultValue="orders">
-              <TabsList className="w-full grid grid-cols-3">
-                <TabsTrigger value="orders" className="gap-1">
+              <TabsList className="w-full grid grid-cols-4">
+                <TabsTrigger value="orders" className="gap-1 text-xs">
                   <Package className="h-3.5 w-3.5" /> Orders
                 </TabsTrigger>
-                <TabsTrigger value="addresses" className="gap-1">
-                  <MapPin className="h-3.5 w-3.5" /> Addresses
+                <TabsTrigger value="rewards" className="gap-1 text-xs">
+                  <Gift className="h-3.5 w-3.5" /> Rewards
                 </TabsTrigger>
-                <TabsTrigger value="favorites" className="gap-1">
-                  <Heart className="h-3.5 w-3.5" /> Favorites
+                <TabsTrigger value="addresses" className="gap-1 text-xs">
+                  <MapPin className="h-3.5 w-3.5" /> Address
+                </TabsTrigger>
+                <TabsTrigger value="favorites" className="gap-1 text-xs">
+                  <Heart className="h-3.5 w-3.5" /> Favs
                 </TabsTrigger>
               </TabsList>
 
@@ -284,6 +322,71 @@ const Profile: React.FC = () => {
                     </Card>
                   ))
                 )}
+              </TabsContent>
+
+              {/* Rewards Tab */}
+              <TabsContent value="rewards" className="mt-4 space-y-4">
+                <Card>
+                  <CardContent className="pt-4">
+                    <h3 className="font-semibold text-sm mb-2">How it works</h3>
+                    <div className="space-y-2 text-xs text-muted-foreground">
+                      <p>🍗 Earn <strong className="text-foreground">1 point per ₹10</strong> spent</p>
+                      <p>💰 Redeem <strong className="text-foreground">10 points = ₹1</strong> discount</p>
+                      <p>🎁 Refer a friend and both get <strong className="text-foreground">₹50 reward</strong></p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {referral && (
+                  <Card>
+                    <CardContent className="pt-4">
+                      <h3 className="font-semibold text-sm mb-2 flex items-center gap-1">
+                        <Share2 className="h-4 w-4" /> Share & Earn
+                      </h3>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Share your code with friends. When they place their first order, you both get ₹{referral.reward_amount}!
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          const text = `Order delicious fried chicken from MFC! Use my referral code ${referral.code} to get ₹${referral.reward_amount} off your first order. Order now: ${window.location.origin}`;
+                          if (navigator.share) {
+                            navigator.share({ text });
+                          } else {
+                            navigator.clipboard.writeText(text);
+                            toast.success('Referral message copied!');
+                          }
+                        }}
+                      >
+                        <Share2 className="h-4 w-4 mr-2" /> Share Referral Code
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm">Points History</h3>
+                  {(!loyaltyTx || loyaltyTx.length === 0) ? (
+                    <p className="text-xs text-muted-foreground text-center py-6">No transactions yet. Place an order to earn points!</p>
+                  ) : (
+                    loyaltyTx.map(tx => (
+                      <Card key={tx.id}>
+                        <CardContent className="py-3 flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">{tx.description}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {new Date(tx.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                            </p>
+                          </div>
+                          <span className={`text-sm font-bold ${tx.points > 0 ? 'text-green-500' : 'text-destructive'}`}>
+                            {tx.points > 0 ? '+' : ''}{tx.points}
+                          </span>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
               </TabsContent>
             </Tabs>
           </motion.div>
