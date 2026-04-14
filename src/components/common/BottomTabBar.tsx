@@ -1,15 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Home, UtensilsCrossed, ShoppingCart, Phone, Search } from 'lucide-react';
+import { Home, UtensilsCrossed, ShoppingCart, Phone, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const tabs = [
   { icon: Home, label: 'Home', path: '/' },
   { icon: UtensilsCrossed, label: 'Menu', path: '/shop' },
   { icon: ShoppingCart, label: 'Cart', path: '__cart__' },
-  { icon: Search, label: 'Track', path: '/track-order' },
+  { icon: User, label: 'Profile', path: '/profile' },
   { icon: Phone, label: 'Contact', path: '/contact' },
 ];
 
@@ -18,12 +19,15 @@ const BottomTabBar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { totalItems, setIsCartOpen } = useCart();
+  const { user } = useAuth();
 
   if (!isMobile) return null;
 
   const handleTabPress = (path: string) => {
     if (path === '__cart__') {
       setIsCartOpen(true);
+    } else if (path === '/profile' && !user) {
+      navigate('/auth');
     } else {
       navigate(path);
     }
