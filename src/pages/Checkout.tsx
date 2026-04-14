@@ -17,6 +17,7 @@ import { generateWhatsAppLink } from '@/lib/whatsapp';
 import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/contexts/AuthContext';
+import { earnPoints } from '@/hooks/useLoyalty';
 
 const STEPS = ['Review', 'Details', 'Payment', 'Summary'];
 
@@ -177,6 +178,10 @@ const Checkout: React.FC = () => {
         console.error('Failed to save order:', insertError);
       } else {
         orderId = insertedOrder.id;
+        // Earn loyalty points for logged-in users
+        if (user) {
+          try { await earnPoints(user.id, orderId, grandTotal); } catch {}
+        }
       }
 
       if (orderId) {
