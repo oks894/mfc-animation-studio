@@ -62,6 +62,35 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorite_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_history: {
         Row: {
           body: string
@@ -104,6 +133,7 @@ export type Database = {
           status: string
           subtotal: number
           total: number
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -119,6 +149,7 @@ export type Database = {
           status?: string
           subtotal: number
           total: number
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -134,6 +165,7 @@ export type Database = {
           status?: string
           subtotal?: number
           total?: number
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -186,6 +218,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          phone: string | null
+          saved_addresses: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone?: string | null
+          saved_addresses?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone?: string | null
+          saved_addresses?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       promotions: {
         Row: {
