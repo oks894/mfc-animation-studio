@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CreditCard, Truck, Copy, Check, ExternalLink, Package, Minus, Plus, ShoppingBag, Tag, MessageCircle } from 'lucide-react';
@@ -16,6 +16,7 @@ import { CheckoutFormData } from '@/types/database';
 import { generateWhatsAppLink } from '@/lib/whatsapp';
 import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
+import { useAuth } from '@/contexts/AuthContext';
 
 const STEPS = ['Review', 'Details', 'Payment', 'Summary'];
 
@@ -30,12 +31,25 @@ const Checkout: React.FC = () => {
   const { items, subtotal, updateQuantity, removeItem, clearCart } = useCart();
   const { data: promotions } = useActivePromotions();
   const { data: settings } = useStoreSettings();
+  const { user, profile } = useAuth();
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [formData, setFormData] = useState<CheckoutFormData>({
     name: '', phone: '', address: '', instructions: '', paymentMethod: 'cod',
   });
+
+  // Prefill from profile
+  useEffect(() => {
+    if (profile) {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || profile.display_name || '',
+        phone: prev.phone || profile.phone || '',
+        address: prev.address || (profile.saved_addresses?.[0] as string) || '',
+      }));
+    }
+  }, [profile]);
   const [deliveryKm, setDeliveryKm] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const [couponCode, setCouponCode] = useState('');
@@ -156,6 +170,7 @@ const Checkout: React.FC = () => {
         subtotal,
         discount: discountAmount,
         total: grandTotal,
+        ...(user ? { user_id: user.id } : {}),
       }).select('id').single();
 
       if (insertError) {
