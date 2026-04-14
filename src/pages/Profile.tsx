@@ -33,6 +33,9 @@ const Profile: React.FC = () => {
   const [newAddress, setNewAddress] = useState('');
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
+  const { data: loyalty } = useLoyaltyPoints();
+  const { data: loyaltyTx } = useLoyaltyTransactions();
+  const { data: referral } = useReferralCode();
 
   useEffect(() => {
     if (!loading && !user) navigate('/auth', { replace: true });
